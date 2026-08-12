@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Pressable, TextInput } from 'react-native';
-import { Search, Plus, Check } from 'lucide-react-native';
+import { Search, Plus, Clock } from 'lucide-react-native';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
 import { BottomSheetModal } from './BottomSheetModal';
@@ -8,7 +8,6 @@ import { Chip } from '../ui/Chip';
 
 export const AddPlaceSheet = () => {
   const activeModal = useAppStore((state) => state.activeModal);
-  const selectedPlace = useAppStore((state) => state.selectedPlace);
   const targetDayForAdd = useAppStore((state) => state.targetDayForAdd);
   const closeModal = useAppStore((state) => state.closeModal);
   const addPlaceToDay = useAppStore((state) => state.addPlaceToDay);
@@ -18,16 +17,17 @@ export const AddPlaceSheet = () => {
 
   const [activeTab, setActiveTab] = useState('Saved'); // 'Saved' | 'Search'
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTime, setSelectedTime] = useState('15:00');
 
   const visible = activeModal === 'addPlace';
 
-  const placesList = activeTab === 'Saved' ? savedPlaces : savedPlaces;
+  const placesList = savedPlaces;
   const filteredList = placesList.filter((item) =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSelectPlace = (place) => {
-    addPlaceToDay(targetDayForAdd, place);
+    addPlaceToDay(targetDayForAdd, place, selectedTime);
   };
 
   return (
@@ -47,8 +47,27 @@ export const AddPlaceSheet = () => {
             { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
           ]}
         >
-          Select from your saved bookmarks or search places in Kyoto.
+          Select from saved places and assign exploration time.
         </Text>
+
+        {/* Time Selector */}
+        <View style={styles.timeRow}>
+          <Clock size={14} color={theme.colors.accentBrand} style={{ marginRight: 6 }} />
+          <Text style={[styles.timeLabel, { color: theme.colors.textSecondary }]}>Scheduled Time:</Text>
+          <TextInput
+            value={selectedTime}
+            onChangeText={setSelectedTime}
+            placeholder="15:00"
+            style={[
+              styles.timeInput,
+              {
+                color: theme.colors.textPrimary,
+                borderColor: theme.colors.borderSubtle,
+                backgroundColor: theme.colors.bgSubtle,
+              },
+            ]}
+          />
+        </View>
 
         {/* Tab Selection */}
         <View style={styles.tabRow}>
@@ -58,13 +77,13 @@ export const AddPlaceSheet = () => {
             onPress={() => setActiveTab('Saved')}
           />
           <Chip
-            label="Search All Spots"
+            label="Search Spots"
             active={activeTab === 'Search'}
             onPress={() => setActiveTab('Search')}
           />
         </View>
 
-        {/* Search Bar if Search tab active */}
+        {/* Search Input */}
         {activeTab === 'Search' && (
           <View
             style={[
@@ -142,7 +161,25 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
+    marginBottom: 10,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
+  },
+  timeLabel: {
+    fontSize: 12,
+    marginRight: 8,
+  },
+  timeInput: {
+    height: 32,
+    width: 70,
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    fontSize: 13,
+    textAlign: 'center',
   },
   tabRow: {
     flexDirection: 'row',
@@ -163,7 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   listScrollView: {
-    maxHeight: 340,
+    maxHeight: 320,
   },
   placeItemRow: {
     flexDirection: 'row',

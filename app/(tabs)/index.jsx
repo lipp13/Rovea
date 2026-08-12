@@ -17,7 +17,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const themeMode = useAppStore((state) => state.themeMode);
   const currentUser = useAppStore((state) => state.currentUser);
-  const activeTrip = useAppStore((state) => state.activeTrip);
+  const getActiveTrip = useAppStore((state) => state.getActiveTrip);
+  const activeTrip = getActiveTrip();
   const savedPlaces = useAppStore((state) => state.savedPlaces);
   const openModal = useAppStore((state) => state.openModal);
   const theme = getTheme(themeMode);

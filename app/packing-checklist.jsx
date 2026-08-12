@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Check, Plus, Circle } from 'lucide-react-native';
-import Animated, { FadeInUp, FadeInDown, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { ArrowLeft, Check, Plus, Trash2, Filter } from 'lucide-react-native';
+import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
 import { Button } from '../components/ui/Button';
+import { Chip } from '../components/ui/Chip';
 
 export default function PackingChecklistScreen() {
   const insets = useSafeAreaInsets();
@@ -15,11 +16,17 @@ export default function PackingChecklistScreen() {
   const packingChecklist = useAppStore((state) => state.packingChecklist);
   const togglePackingItem = useAppStore((state) => state.togglePackingItem);
   const addPackingItem = useAppStore((state) => state.addPackingItem);
+  const deletePackingItem = useAppStore((state) => state.deletePackingItem);
   const theme = getTheme(themeMode);
 
   const [newItemName, setNewItemName] = useState('');
   const [selectedCategoryForAdd, setSelectedCategoryForAdd] = useState('DOCUMENTS');
   const [showAddRow, setShowAddRow] = useState(false);
+  const [filterMode, setFilterMode] = useState('All'); // 'All' | 'Unpacked'
+
+  const total = packingChecklist.totalItems || 1;
+  const packed = packingChecklist.packedCount || 0;
+  const percentage = Math.round((packed / total) * 100);
 
   const handleAddItemSubmit = () => {
     if (!newItemName.trim()) return;
@@ -65,7 +72,7 @@ export default function PackingChecklistScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              {packingChecklist.packedCount} / {packingChecklist.totalItems}
+              {packed} / {total}
             </Text>
             <Text
               style={[
@@ -73,7 +80,7 @@ export default function PackingChecklistScreen() {
                 { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
               ]}
             >
-              items packed
+              items packed ({percentage}%)
             </Text>
           </View>
 
@@ -83,7 +90,7 @@ export default function PackingChecklistScreen() {
               style={[
                 styles.progressFill,
                 {
-                  width: `${(packingChecklist.packedCount / packingChecklist.totalItems) * 100}%`,
+                  width: `${(packed / total) * 100}%`,
                   backgroundColor: theme.colors.accentBrand,
                 },
               ]}
@@ -91,7 +98,13 @@ export default function PackingChecklistScreen() {
           </View>
         </Animated.View>
 
-        {/* Add Custom Item Row Input if Toggled */}
+        {/* Filter Bar */}
+        <View style={styles.filterRow}>
+          <Chip label="All Items" active={filterMode === 'All'} onPress={() => setFilterMode('All')} />
+          <Chip label="Unpacked Only" active={filterMode === 'Unpacked'} onPress={() => setFilterMode('Unpacked')} />
+        </View>
+
+        {/* Add Custom Item Box */}
         {showAddRow && (
           <Animated.View
             entering={FadeInUp.duration(300)}
@@ -114,71 +127,101 @@ export default function PackingChecklistScreen() {
                 },
               ]}
             />
+
+            <View style={{ flexDirection: 'row', gap: 6, marginBottom: 10 }}>
+              {['DOCUMENTS', 'CLOTHING', 'ELECTRONICS'].map((cat) => (
+                <Chip
+                  key={cat}
+                  label={cat}
+                  active={selectedCategoryForAdd === cat}
+                  onPress={() => setSelectedCategoryForAdd(cat)}
+                />
+              ))}
+            </View>
+
             <Button title="Add Item" onPress={handleAddItemSubmit} variant="primary" />
           </Animated.View>
         )}
 
         {/* Categorized Checklist Sections */}
-        {packingChecklist.sections.map((sec, secIdx) => (
-          <Animated.View
-            key={sec.category}
-            entering={FadeInDown.duration(400).delay(secIdx * 100)}
-            style={styles.sectionBlock}
-          >
-            <Text
-              style={[
-                styles.sectionCategoryHeader,
-                { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-              ]}
+        {packingChecklist.sections.map((sec, secIdx) => {
+          const visibleItems =
+            filterMode === 'Unpacked' ? sec.items.filter((i) => !i.checked) : sec.items;
+
+          if (visibleItems.length === 0 && filterMode === 'Unpacked') return null;
+
+          return (
+            <Animated.View
+              key={sec.category}
+              entering={FadeInDown.duration(400).delay(secIdx * 80)}
+              style={styles.sectionBlock}
             >
-              {sec.category}
-            </Text>
+              <Text
+                style={[
+                  styles.sectionCategoryHeader,
+                  { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
+                ]}
+              >
+                {sec.category}
+              </Text>
 
-            <View style={styles.itemList}>
-              {sec.items.map((item) => (
-                <Pressable
-                  key={item.id}
-                  onPress={() => togglePackingItem(item.id)}
-                  style={[
-                    styles.itemRow,
-                    { borderBottomColor: theme.colors.borderSubtle },
-                  ]}
-                >
+              <View style={styles.itemList}>
+                {visibleItems.map((item) => (
                   <View
+                    key={item.id}
                     style={[
-                      styles.checkbox,
-                      {
-                        backgroundColor: item.checked
-                          ? theme.colors.accentBrand
-                          : 'transparent',
-                        borderColor: item.checked
-                          ? theme.colors.accentBrand
-                          : theme.colors.borderStrong,
-                      },
+                      styles.itemRow,
+                      { borderBottomColor: theme.colors.borderSubtle },
                     ]}
                   >
-                    {item.checked && <Check size={12} color="#FFFFFF" strokeWidth={3} />}
-                  </View>
+                    <Pressable
+                      onPress={() => togglePackingItem(item.id)}
+                      style={styles.itemRowLeft}
+                    >
+                      <View
+                        style={[
+                          styles.checkbox,
+                          {
+                            backgroundColor: item.checked
+                              ? theme.colors.accentBrand
+                              : 'transparent',
+                            borderColor: item.checked
+                              ? theme.colors.accentBrand
+                              : theme.colors.borderStrong,
+                          },
+                        ]}
+                      >
+                        {item.checked && <Check size={12} color="#FFFFFF" strokeWidth={3} />}
+                      </View>
 
-                  <Text
-                    style={[
-                      styles.itemNameText,
-                      {
-                        color: item.checked
-                          ? theme.colors.textMuted
-                          : theme.colors.textPrimary,
-                        textDecorationLine: item.checked ? 'line-through' : 'none',
-                        fontFamily: theme.fonts.sansRegular,
-                      },
-                    ]}
-                  >
-                    {item.name}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </Animated.View>
-        ))}
+                      <Text
+                        style={[
+                          styles.itemNameText,
+                          {
+                            color: item.checked
+                              ? theme.colors.textMuted
+                              : theme.colors.textPrimary,
+                            textDecorationLine: item.checked ? 'line-through' : 'none',
+                            fontFamily: theme.fonts.sansRegular,
+                          },
+                        ]}
+                      >
+                        {item.name}
+                      </Text>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={() => deletePackingItem(item.id)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Trash2 size={16} color={theme.colors.textMuted} />
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            </Animated.View>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -203,7 +246,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   topProgressSection: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   overlineTag: {
     fontSize: 11,
@@ -234,6 +277,10 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 2,
   },
+  filterRow: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
   addItemBox: {
     padding: 14,
     borderRadius: 12,
@@ -262,8 +309,15 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justify: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
+  },
+  itemRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    paddingRight: 12,
   },
   checkbox: {
     width: 20,

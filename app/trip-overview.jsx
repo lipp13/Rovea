@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { ArrowLeft, Calendar, Sun, Wallet, CheckSquare, Clock, ChevronRight } from 'lucide-react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Calendar, Sun, Wallet, CheckSquare, Clock, ChevronRight, Trash2 } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
@@ -11,14 +11,27 @@ import { Button } from '../components/ui/Button';
 export default function TripOverviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const themeMode = useAppStore((state) => state.themeMode);
-  const activeTrip = useAppStore((state) => state.activeTrip);
+  const trips = useAppStore((state) => state.trips);
+  const activeTripId = useAppStore((state) => state.activeTripId);
+  const getActiveTrip = useAppStore((state) => state.getActiveTrip);
+  const deleteTrip = useAppStore((state) => state.deleteTrip);
   const expenseTracker = useAppStore((state) => state.expenseTracker);
   const packingChecklist = useAppStore((state) => state.packingChecklist);
   const openModal = useAppStore((state) => state.openModal);
   const theme = getTheme(themeMode);
 
+  // Dynamic trip lookup
+  const targetId = params.id || activeTripId;
+  const activeTrip = trips.find((t) => t.id === targetId) || getActiveTrip();
+
   if (!activeTrip) return null;
+
+  const handleDelete = () => {
+    deleteTrip(activeTrip.id);
+    router.replace('/(tabs)/trips');
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}>
@@ -39,19 +52,29 @@ export default function TripOverviewScreen() {
             >
               <ArrowLeft size={20} color="#FFFFFF" />
             </Pressable>
+
+            <Pressable
+              onPress={handleDelete}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={styles.backBtn}
+            >
+              <Trash2 size={18} color="#FFFFFF" />
+            </Pressable>
           </View>
 
           {/* Scrim Title Content */}
           <View style={styles.heroScrimContent}>
             <View style={styles.badgeRow}>
               <View style={styles.dayBadge}>
-                <Text style={styles.dayBadgeText}>Day {activeTrip.currentDay} of {activeTrip.totalDays}</Text>
+                <Text style={styles.dayBadgeText}>
+                  Day {activeTrip.currentDay || 1} of {activeTrip.totalDays || 7}
+                </Text>
               </View>
             </View>
             <Text style={styles.destinationHeader}>{activeTrip.destination.toUpperCase()}</Text>
             <Text style={styles.tripTitleText}>{activeTrip.title}</Text>
             <Text style={styles.dateRangeText}>
-              {activeTrip.startDate} — {activeTrip.endDate}, {activeTrip.year}
+              {activeTrip.startDate} — {activeTrip.endDate}, {activeTrip.year || '2026'}
             </Text>
           </View>
         </View>
@@ -82,7 +105,7 @@ export default function TripOverviewScreen() {
                     { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
                   ]}
                 >
-                  Day 03 — {activeTrip.currentDateLabel}
+                  Day 0{activeTrip.currentDay || 3} — {activeTrip.currentDateLabel || 'October 14'}
                 </Text>
                 <Text
                   style={[
@@ -90,7 +113,7 @@ export default function TripOverviewScreen() {
                     { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
                   ]}
                 >
-                  4 spots scheduled • Up next: {activeTrip.nextActivity?.title} ({activeTrip.nextActivity?.time})
+                  Daily spots scheduled • Up next: {activeTrip.nextActivity?.title || 'Exploration'}
                 </Text>
               </View>
             </View>
@@ -129,7 +152,7 @@ export default function TripOverviewScreen() {
                     { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
                   ]}
                 >
-                  Stay & Dining represent 77% of total budget
+                  {expenseTracker.transactions.length} transactions logged
                 </Text>
               </View>
             </View>
@@ -168,7 +191,7 @@ export default function TripOverviewScreen() {
                     { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
                   ]}
                 >
-                  Documents and electronics fully packed
+                  {Math.round((packingChecklist.packedCount / (packingChecklist.totalItems || 1)) * 100)}% progress complete
                 </Text>
               </View>
             </View>
@@ -207,7 +230,7 @@ export default function TripOverviewScreen() {
                     { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
                   ]}
                 >
-                  High {activeTrip.weather?.high} • Low {activeTrip.weather?.low} • Humidity {activeTrip.weather?.humidity}
+                  High {activeTrip.weather?.high} • Low {activeTrip.weather?.low}
                 </Text>
               </View>
             </View>
@@ -237,6 +260,8 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     flexDirection: 'row',
+    alignItems: 'center',
+    justify: 'space-between',
   },
   backBtn: {
     width: 40,

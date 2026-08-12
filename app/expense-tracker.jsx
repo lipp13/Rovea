@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Plus, Wallet, Tag } from 'lucide-react-native';
+import { ArrowLeft, Plus, Wallet, Trash2, AlertCircle } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
@@ -14,28 +14,39 @@ export default function ExpenseTrackerScreen() {
   const themeMode = useAppStore((state) => state.themeMode);
   const expenseTracker = useAppStore((state) => state.expenseTracker);
   const addExpense = useAppStore((state) => state.addExpense);
+  const deleteExpense = useAppStore((state) => state.deleteExpense);
   const theme = getTheme(themeMode);
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [expenseTitle, setExpenseTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Food & Dining');
+  const [formError, setFormError] = useState('');
 
+  const remainingBudget = Math.max(0, expenseTracker.budgetAmount - expenseTracker.spentAmount);
   const progressRatio = Math.min(
-    expenseTracker.spentAmount / expenseTracker.budgetAmount,
+    expenseTracker.spentAmount / (expenseTracker.budgetAmount || 1),
     1.0
   );
 
   const handleAddExpenseSubmit = () => {
-    if (!expenseTitle.trim() || !expenseAmount.trim()) {
-      Alert.alert('Missing Details', 'Please enter title and amount.');
+    setFormError('');
+    if (!expenseTitle.trim()) {
+      setFormError('Please enter an expense title.');
       return;
     }
+    const parsedAmount = parseFloat(expenseAmount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      setFormError('Please enter a valid positive amount.');
+      return;
+    }
+
     addExpense({
-      title: expenseTitle,
-      amount: expenseAmount,
+      title: expenseTitle.trim(),
+      amount: parsedAmount,
       category: selectedCategory,
     });
+
     setExpenseTitle('');
     setExpenseAmount('');
     setShowAddForm(false);
@@ -69,7 +80,7 @@ export default function ExpenseTrackerScreen() {
         {/* Editorial Top Spend / Budget Header (Typography & Whitespace) */}
         <Animated.View entering={FadeInUp.duration(400)} style={styles.topBudgetSection}>
           <Text style={[styles.overlineTag, { color: theme.colors.accentBrand }]}>
-            KYOTO TRIP BUDGET
+            TRIP BUDGET TRACKER
           </Text>
 
           <View style={styles.amountDisplayRow}>
@@ -97,7 +108,7 @@ export default function ExpenseTrackerScreen() {
                 {expenseTracker.budgetFormatted}
               </Text>
               <Text style={[styles.amountSublabel, { color: theme.colors.textMuted }]}>
-                total budget
+                budget limit ({expenseTracker.currency}{remainingBudget.toLocaleString()} left)
               </Text>
             </View>
           </View>
@@ -133,6 +144,15 @@ export default function ExpenseTrackerScreen() {
             >
               Log New Expense
             </Text>
+
+            {formError !== '' && (
+              <View style={styles.errorBox}>
+                <AlertCircle size={14} color={theme.colors.accentBrand} style={{ marginRight: 6 }} />
+                <Text style={[styles.errorText, { color: theme.colors.accentBrand }]}>
+                  {formError}
+                </Text>
+              </View>
+            )}
 
             <TextInput
               value={expenseTitle}
@@ -177,10 +197,10 @@ export default function ExpenseTrackerScreen() {
         {/* Subtle Hairline Divider */}
         <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-        {/* Category Breakdown Section (Typography & Spacing - No SaaS Cards) */}
+        {/* Category Breakdown Section (Typography & Spacing) */}
         <Animated.View entering={FadeInDown.duration(400).delay(150)}>
           <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-            BREAKDOWN BY CATEGORY
+            DYNAMIC CATEGORY BREAKDOWN
           </Text>
 
           <View style={styles.categoryList}>
@@ -224,7 +244,7 @@ export default function ExpenseTrackerScreen() {
         {/* Recent Transactions List */}
         <Animated.View entering={FadeInDown.duration(400).delay(300)}>
           <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-            RECENT LOGS
+            TRANSACTION LOGS ({expenseTracker.transactions.length})
           </Text>
 
           {expenseTracker.transactions.map((tx) => (
@@ -235,7 +255,7 @@ export default function ExpenseTrackerScreen() {
                 { borderBottomColor: theme.colors.borderSubtle },
               ]}
             >
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text
                   style={[
                     styles.txTitle,
@@ -248,14 +268,22 @@ export default function ExpenseTrackerScreen() {
                   {tx.category} • {tx.date}
                 </Text>
               </View>
+
               <Text
                 style={[
                   styles.txAmount,
-                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold },
+                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold, marginRight: 12 },
                 ]}
               >
                 {tx.amount}
               </Text>
+
+              <Pressable
+                onPress={() => deleteExpense(tx.id)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Trash2 size={16} color={theme.colors.textMuted} />
+              </Pressable>
             </View>
           ))}
         </Animated.View>
@@ -329,7 +357,15 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 10,
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  errorText: {
+    fontSize: 12,
   },
   formInput: {
     height: 44,

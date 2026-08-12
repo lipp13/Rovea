@@ -12,14 +12,14 @@ export const PlaceDetailSheet = () => {
   const closeModal = useAppStore((state) => state.closeModal);
   const openModal = useAppStore((state) => state.openModal);
   const toggleSavePlace = useAppStore((state) => state.toggleSavePlace);
-  const savedPlaces = useAppStore((state) => state.savedPlaces);
+  const isPlaceSaved = useAppStore((state) => state.isPlaceSaved);
   const themeMode = useAppStore((state) => state.themeMode);
   const theme = getTheme(themeMode);
 
   const visible = activeModal === 'placeDetail' && !!selectedPlace;
   if (!selectedPlace) return null;
 
-  const isSaved = savedPlaces.some((p) => p.id === selectedPlace.id);
+  const isSaved = isPlaceSaved(selectedPlace.id);
 
   const handleAddToTrip = () => {
     closeModal();
@@ -114,15 +114,15 @@ export const PlaceDetailSheet = () => {
         {/* CTAs */}
         <View style={styles.actionRow}>
           <Button
-            title="Save Spot"
+            title={isSaved ? 'Saved' : 'Save Spot'}
             icon={Heart}
             onPress={() => toggleSavePlace(selectedPlace)}
-            variant="secondary"
+            variant={isSaved ? 'secondary' : 'secondary'}
             fullWidth={false}
             style={styles.secondarySaveBtn}
           />
           <Button
-            title="Add to Trip"
+            title="Add to Itinerary"
             icon={Plus}
             onPress={handleAddToTrip}
             variant="primary"
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   titleStack: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    justify: 'space-between',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 24,

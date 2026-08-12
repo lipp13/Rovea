@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Plus, Clock, MapPin, ChevronRight } from 'lucide-react-native';
+import { ArrowLeft, Plus, Clock, MapPin, ChevronRight, Trash2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
@@ -15,12 +15,13 @@ export default function DailyItineraryScreen() {
   const themeMode = useAppStore((state) => state.themeMode);
   const itineraryDays = useAppStore((state) => state.itineraryDays);
   const openModal = useAppStore((state) => state.openModal);
+  const deleteItineraryItem = useAppStore((state) => state.deleteItineraryItem);
   const theme = getTheme(themeMode);
 
   const [selectedDayNumber, setSelectedDayNumber] = useState(3);
 
   const currentDayData =
-    itineraryDays.find((d) => d.dayNumber === selectedDayNumber) || itineraryDays[2];
+    itineraryDays.find((d) => d.dayNumber === selectedDayNumber) || itineraryDays[0];
 
   const handleDaySelect = (dayNum) => {
     setSelectedDayNumber(dayNum);
@@ -33,6 +34,10 @@ export default function DailyItineraryScreen() {
 
   const handleSpotPress = (spot) => {
     openModal('placeDetail', { place: spot });
+  };
+
+  const handleDeleteSpot = (spotId) => {
+    deleteItineraryItem(selectedDayNumber, spotId);
   };
 
   return (
@@ -126,7 +131,7 @@ export default function DailyItineraryScreen() {
           {currentDayData.spots?.map((spot, index) => (
             <Animated.View
               key={spot.id}
-              entering={FadeInDown.duration(400).delay(index * 80)}
+              entering={FadeInDown.duration(400).delay(index * 60)}
               style={styles.timelineRow}
             >
               {/* Left Column: Time & Subtle Node Line */}
@@ -189,7 +194,13 @@ export default function DailyItineraryScreen() {
                     </Text>
                   )}
                 </View>
-                <ChevronRight size={16} color={theme.colors.textSecondary} />
+                <Pressable
+                  onPress={() => handleDeleteSpot(spot.id)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={{ padding: 4 }}
+                >
+                  <Trash2 size={16} color={theme.colors.textMuted} />
+                </Pressable>
               </Pressable>
             </Animated.View>
           ))}

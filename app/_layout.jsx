@@ -19,6 +19,7 @@ import { getTheme } from '../constants/theme';
 import { PlaceDetailSheet } from '../components/sheets/PlaceDetailSheet';
 import { AddPlaceSheet } from '../components/sheets/AddPlaceSheet';
 import { WeatherDetailSheet } from '../components/sheets/WeatherDetailSheet';
+import { OfflineBanner } from '../components/ui/OfflineBanner';
 
 export default function RootLayout() {
   const themeMode = useAppStore((state) => state.themeMode);
@@ -44,6 +45,7 @@ export default function RootLayout() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}>
       <StatusBar style={themeMode === 'dark' ? 'light' : 'dark'} />
+      <OfflineBanner />
       <Stack
         screenOptions={{
           headerShown: false,

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { ArrowLeft, Check, Calendar, MapPin, Users } from 'lucide-react-native';
-import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Check, Calendar, MapPin, Users, AlertCircle } from 'lucide-react-native';
+import Animated, { FadeInRight, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
 import { Button } from '../components/ui/Button';
@@ -11,38 +11,55 @@ import { Button } from '../components/ui/Button';
 export default function CreateTripScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const themeMode = useAppStore((state) => state.themeMode);
-  const createNewTrip = useAppStore((state) => state.createNewTrip);
+  const destinations = useAppStore((state) => state.destinations);
+  const createTrip = useAppStore((state) => state.createTrip);
   const theme = getTheme(themeMode);
 
+  const initialDest = params.destination || 'Kyoto, Japan';
+
   const [step, setStep] = useState(1);
-  const [destination, setDestination] = useState('Kyoto, Japan');
+  const [destination, setDestination] = useState(initialDest);
   const [startDate, setStartDate] = useState('Oct 12, 2026');
   const [endDate, setEndDate] = useState('Oct 18, 2026');
-  const [title, setTitle] = useState('Autumn in Kyoto');
+  const [title, setTitle] = useState(`Trip to ${initialDest.split(',')[0]}`);
   const [travelers, setTravelers] = useState('Solo Traveler');
+  const [validationError, setValidationError] = useState('');
 
   const handleNext = () => {
-    if (step < 3) {
-      setStep((prev) => prev + 1);
+    setValidationError('');
+
+    if (step === 1) {
+      if (!destination.trim()) {
+        setValidationError('Please enter or select a destination.');
+        return;
+      }
+      setStep(2);
+    } else if (step === 2) {
+      if (!startDate.trim() || !endDate.trim()) {
+        setValidationError('Please specify both start and end dates.');
+        return;
+      }
+      setStep(3);
     } else {
-      createNewTrip({
-        id: `trip-${Date.now()}`,
-        title: title || 'New Trip',
+      // Step 3 Submit
+      const created = createTrip({
+        title: title || `Wanderlust in ${destination.split(',')[0]}`,
         destination,
+        country: destination.includes(',') ? destination.split(',')[1].trim() : 'Japan',
         startDate,
         endDate,
+        year: '2026',
         totalDays: 7,
-        coverImage: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
-        status: 'Upcoming',
       });
 
-      Alert.alert('Trip Created', `"${title}" has been added to your itinerary hub.`);
       router.replace('/trip-overview');
     }
   };
 
   const handleBack = () => {
+    setValidationError('');
     if (step > 1) setStep((prev) => prev - 1);
     else router.back();
   };
@@ -66,6 +83,22 @@ export default function CreateTripScreen() {
         contentContainerStyle={styles.contentScroll}
         showsVerticalScrollIndicator={false}
       >
+        {/* Inline Error Banner if Validation Fails */}
+        {validationError !== '' && (
+          <Animated.View
+            entering={FadeInDown.duration(200)}
+            style={[
+              styles.errorBanner,
+              { backgroundColor: theme.colors.accentSubtle, borderColor: theme.colors.accentBrand },
+            ]}
+          >
+            <AlertCircle size={16} color={theme.colors.accentBrand} style={{ marginRight: 8 }} />
+            <Text style={[styles.errorText, { color: theme.colors.accentBrand }]}>
+              {validationError}
+            </Text>
+          </Animated.View>
+        )}
+
         {/* Step 1: Destination */}
         {step === 1 && (
           <Animated.View entering={FadeInRight.duration(300)} style={styles.stepContainer}>
@@ -83,10 +116,10 @@ export default function CreateTripScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              Where to next?
+              Where are you wandering?
             </Text>
             <Text style={[styles.subheadline, { color: theme.colors.textSecondary }]}>
-              Enter the city or country you plan to explore.
+              Enter or select a curated destination to build your itinerary.
             </Text>
 
             <View
@@ -98,14 +131,59 @@ export default function CreateTripScreen() {
               <MapPin size={20} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
               <TextInput
                 value={destination}
-                onChangeText={setDestination}
-                placeholder="e.g., Kyoto, Japan"
+                onChangeText={(text) => {
+                  setDestination(text);
+                  setTitle(`Trip to ${text.split(',')[0]}`);
+                }}
+                placeholder="e.g. Kyoto, Japan"
                 placeholderTextColor={theme.colors.textMuted}
                 style={[
                   styles.inputField,
                   { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
                 ]}
               />
+            </View>
+
+            {/* Destination Presets */}
+            <Text style={[styles.presetLabel, { color: theme.colors.textSecondary }]}>
+              SUGGESTED RETREATS
+            </Text>
+            <View style={styles.presetList}>
+              {destinations.map((d) => (
+                <Pressable
+                  key={d.id}
+                  onPress={() => {
+                    const full = `${d.title}, ${d.country}`;
+                    setDestination(full);
+                    setTitle(`Trip to ${d.title}`);
+                  }}
+                  style={[
+                    styles.presetChip,
+                    {
+                      backgroundColor:
+                        destination.includes(d.title)
+                          ? theme.colors.accentSubtle
+                          : theme.colors.bgSurface,
+                      borderColor:
+                        destination.includes(d.title)
+                          ? theme.colors.accentBrand
+                          : theme.colors.borderSubtle,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      color: destination.includes(d.title)
+                        ? theme.colors.accentBrand
+                        : theme.colors.textPrimary,
+                      fontFamily: theme.fonts.sansMedium,
+                      fontSize: 13,
+                    }}
+                  >
+                    {d.title}, {d.country}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
           </Animated.View>
         )}
@@ -127,10 +205,10 @@ export default function CreateTripScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              When are you wandering?
+              When are you traveling?
             </Text>
             <Text style={[styles.subheadline, { color: theme.colors.textSecondary }]}>
-              Select your start and end dates for {destination}.
+              Select departure and return dates for {destination}.
             </Text>
 
             <View style={styles.dateInputsRow}>
@@ -189,10 +267,10 @@ export default function CreateTripScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              Name your journey
+              Title your retreat
             </Text>
             <Text style={[styles.subheadline, { color: theme.colors.textSecondary }]}>
-              Give your trip an editorial title to inspire your planning.
+              Name your journey and specify your travel party style.
             </Text>
 
             <View
@@ -204,7 +282,7 @@ export default function CreateTripScreen() {
               <TextInput
                 value={title}
                 onChangeText={setTitle}
-                placeholder="e.g., Autumn in Kyoto"
+                placeholder="e.g. Autumn in Kyoto"
                 placeholderTextColor={theme.colors.textMuted}
                 style={[
                   styles.inputField,
@@ -214,7 +292,7 @@ export default function CreateTripScreen() {
             </View>
 
             <Text style={[styles.dateLabel, { color: theme.colors.textSecondary, marginBottom: 8 }]}>
-              WHO IS TRAVELING?
+              TRAVEL PARTY
             </Text>
             <View style={styles.travelerOptions}>
               {['Solo Traveler', 'Couple', 'Small Group'].map((opt) => (
@@ -257,7 +335,7 @@ export default function CreateTripScreen() {
         )}
       </ScrollView>
 
-      {/* Bottom CTA Bar */}
+      {/* Bottom Action CTA Dock */}
       <View
         style={[
           styles.bottomDock,
@@ -265,7 +343,7 @@ export default function CreateTripScreen() {
         ]}
       >
         <Button
-          title={step === 3 ? 'Create Itinerary' : 'Continue'}
+          title={step === 3 ? 'Create & Open Trip' : 'Continue'}
           onPress={handleNext}
           variant="primary"
         />
@@ -283,7 +361,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justify: 'space-between',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   stepIndicator: {
     fontSize: 12,
@@ -293,7 +371,19 @@ const styles = StyleSheet.create({
   },
   contentScroll: {
     paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingTop: 8,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  errorText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   stepContainer: {
     paddingTop: 8,
@@ -304,14 +394,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   headline: {
-    fontSize: 34,
-    lineHeight: 40,
-    marginBottom: 10,
+    fontSize: 32,
+    lineHeight: 38,
+    marginBottom: 8,
   },
   subheadline: {
     fontSize: 15,
     lineHeight: 22,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -323,7 +413,23 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 17,
+  },
+  presetLabel: {
+    fontSize: 10,
+    letterSpacing: 1.2,
+    fontWeight: '600',
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  presetList: {
+    gap: 8,
+  },
+  presetChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   dateInputsRow: {
     flexDirection: 'row',

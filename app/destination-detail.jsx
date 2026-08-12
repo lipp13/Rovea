@@ -17,12 +17,15 @@ export default function DestinationDetailScreen() {
   const openModal = useAppStore((state) => state.openModal);
   const theme = getTheme(themeMode);
 
-  // Default to Kyoto if no param provided
+  // Dynamic destination lookup by param id
   const destId = params.id || 'dest-kyoto';
   const destination = destinations.find((d) => d.id === destId) || destinations[0];
 
   const handlePlanTrip = () => {
-    router.push('/create-trip');
+    router.push({
+      pathname: '/create-trip',
+      params: { destination: `${destination.title}, ${destination.country}` },
+    });
   };
 
   const handlePlacePress = (spot) => {
@@ -35,9 +38,10 @@ export default function DestinationDetailScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Large Cinematic Destination Image */}
+        {/* Large Full-Bleed Destination Image Header */}
         <View style={styles.heroImageContainer}>
           <Image source={{ uri: destination.coverImage }} style={styles.heroImage} />
+
           {/* Top Bar Header Navigation */}
           <View style={[styles.navHeader, { paddingTop: insets.top + 8 }]}>
             <Pressable
@@ -47,20 +51,12 @@ export default function DestinationDetailScreen() {
             >
               <ArrowLeft size={20} color="#FFFFFF" />
             </Pressable>
-            <View style={styles.rightNav}>
-              <Pressable
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={styles.backButton}
-              >
-                <Heart size={20} color="#FFFFFF" />
-              </Pressable>
-            </View>
           </View>
         </View>
 
         {/* Content Body (Editorial Typography & Whitespace - No Card Containers) */}
         <View style={styles.bodyContent}>
-          {/* Category Tag */}
+          {/* Country Tag */}
           <Text style={[styles.countryTag, { color: theme.colors.accentBrand }]}>
             {destination.country.toUpperCase()} • {destination.category.toUpperCase()}
           </Text>
@@ -144,7 +140,7 @@ export default function DestinationDetailScreen() {
                 { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
               ]}
             >
-              HIGHLIGHTS
+              PLACES TO DISCOVER
             </Text>
             <Text
               style={[
@@ -152,7 +148,7 @@ export default function DestinationDetailScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              Curated Spots in {destination.title}
+              Curated Highlights in {destination.title}
             </Text>
           </View>
 
@@ -238,9 +234,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     alignItems: 'center',
     justify: 'center',
-  },
-  rightNav: {
-    flexDirection: 'row',
   },
   bodyContent: {
     paddingHorizontal: 20,
