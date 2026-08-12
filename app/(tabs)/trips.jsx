@@ -13,19 +13,25 @@ export default function TripsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const themeMode = useAppStore((state) => state.themeMode);
-  const activeTrip = useAppStore((state) => state.activeTrip);
-  const upcomingTrips = useAppStore((state) => state.upcomingTrips);
-  const pastTrips = useAppStore((state) => state.pastTrips);
+  const getActiveTrip = useAppStore((state) => state.getActiveTrip);
+  const activeTrip = getActiveTrip();
+  const trips = useAppStore((state) => state.trips);
   const theme = getTheme(themeMode);
 
   const [activeTab, setActiveTab] = useState('Active'); // 'Active' | 'Past'
+
+  const upcomingTrips = trips.filter((t) => t.id !== activeTrip?.id && t.status !== 'Completed');
+  const pastTrips = trips.filter((t) => t.status === 'Completed');
 
   const handleCreateTrip = () => {
     router.push('/create-trip');
   };
 
-  const handleTripOverview = () => {
-    router.push('/trip-overview');
+  const handleTripOverview = (tripId) => {
+    router.push({
+      pathname: '/trip-overview',
+      params: { id: tripId || activeTrip?.id },
+    });
   };
 
   return (
@@ -78,38 +84,40 @@ export default function TripsScreen() {
       {activeTab === 'Active' && (
         <>
           {/* Active Trip Hero Banner */}
-          <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.activeSection}>
-            <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-              CURRENT TRIP IN PROGRESS
-            </Text>
+          {activeTrip && (
+            <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.activeSection}>
+              <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
+                CURRENT TRIP IN PROGRESS
+              </Text>
 
-            <Pressable onPress={handleTripOverview} style={styles.heroCard}>
-              <Image source={{ uri: activeTrip.coverImage }} style={styles.heroImage} />
-              <View style={styles.heroScrim}>
-                <View style={styles.dayTag}>
-                  <Text style={styles.dayTagText}>
-                    Day {activeTrip.currentDay} of {activeTrip.totalDays}
+              <Pressable onPress={() => handleTripOverview(activeTrip.id)} style={styles.heroCard}>
+                <Image source={{ uri: activeTrip.coverImage }} style={styles.heroImage} />
+                <View style={styles.heroScrim}>
+                  <View style={styles.dayTag}>
+                    <Text style={styles.dayTagText}>
+                      Day {activeTrip.currentDay || 1} of {activeTrip.totalDays || 7}
+                    </Text>
+                  </View>
+                  <Text style={styles.heroDestination}>{activeTrip.destination.toUpperCase()}</Text>
+                  <Text style={styles.heroTitle}>{activeTrip.title}</Text>
+                  <Text style={styles.heroDates}>
+                    {activeTrip.startDate} — {activeTrip.endDate} ({activeTrip.daysRemaining || 7} days remaining)
                   </Text>
                 </View>
-                <Text style={styles.heroDestination}>{activeTrip.destination.toUpperCase()}</Text>
-                <Text style={styles.heroTitle}>{activeTrip.title}</Text>
-                <Text style={styles.heroDates}>
-                  {activeTrip.startDate} — {activeTrip.endDate} ({activeTrip.daysRemaining} days remaining)
-                </Text>
-              </View>
-            </Pressable>
-          </Animated.View>
+              </Pressable>
+            </Animated.View>
+          )}
 
           {/* Upcoming Trips List */}
           <Animated.View entering={FadeInDown.duration(400).delay(300)} style={styles.upcomingSection}>
             <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-              UPCOMING RETREATS
+              UPCOMING RETREATS ({upcomingTrips.length})
             </Text>
 
             {upcomingTrips.map((trip) => (
               <Pressable
                 key={trip.id}
-                onPress={handleTripOverview}
+                onPress={() => handleTripOverview(trip.id)}
                 style={[
                   styles.tripRow,
                   { borderBottomColor: theme.colors.borderSubtle },
@@ -142,12 +150,13 @@ export default function TripsScreen() {
       {activeTab === 'Past' && (
         <Animated.View entering={FadeInDown.duration(400)} style={styles.pastSection}>
           <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-            COMPLETED JOURNEYS
+            COMPLETED JOURNEYS ({pastTrips.length})
           </Text>
 
           {pastTrips.map((trip) => (
-            <View
+            <Pressable
               key={trip.id}
+              onPress={() => handleTripOverview(trip.id)}
               style={[
                 styles.tripRow,
                 { borderBottomColor: theme.colors.borderSubtle },
@@ -167,10 +176,10 @@ export default function TripsScreen() {
                   {trip.title}
                 </Text>
                 <Text style={[styles.rowDates, { color: theme.colors.textSecondary }]}>
-                  {trip.startDate} — {trip.endDate} • {trip.placesVisited} places visited
+                  {trip.startDate} — {trip.endDate} • {trip.placesVisited || 12} places visited
                 </Text>
               </View>
-            </View>
+            </Pressable>
           ))}
         </Animated.View>
       )}
