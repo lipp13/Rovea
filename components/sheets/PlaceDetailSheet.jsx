@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Pressable } from 'react-native';
-import { MapPin, Clock, Star, Heart, Plus } from 'lucide-react-native';
+import { MapPin, Clock, Star, Heart, Plus, ExternalLink } from 'lucide-react-native';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
 import { BottomSheetModal } from './BottomSheetModal';
 import { Button } from '../ui/Button';
+import { LocationService } from '../../services/location';
 
 export const PlaceDetailSheet = () => {
   const activeModal = useAppStore((state) => state.activeModal);
@@ -20,10 +21,15 @@ export const PlaceDetailSheet = () => {
   if (!selectedPlace) return null;
 
   const isSaved = isPlaceSaved(selectedPlace.id);
+  const addressText = selectedPlace.address || `${selectedPlace.title}, ${selectedPlace.city || 'Kyoto'}, Japan`;
 
   const handleAddToTrip = () => {
     closeModal();
     openModal('addPlace', { place: selectedPlace, dayNumber: 3 });
+  };
+
+  const handleOpenMaps = () => {
+    LocationService.openInNativeMaps(addressText, selectedPlace.title);
   };
 
   return (
@@ -73,15 +79,15 @@ export const PlaceDetailSheet = () => {
             { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
           ]}
         >
-          {selectedPlace.description || selectedPlace.notes || 'Curated travel spot in Kyoto.'}
+          {selectedPlace.description || selectedPlace.notes || 'Curated travel spot.'}
         </Text>
 
         {/* Hairline Divider */}
         <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-        {/* Info Items Rows (Subtle Dividers) */}
+        {/* Info Items Rows (Address with Maps Deep Linking) */}
         <View style={styles.infoSection}>
-          <View style={styles.infoRow}>
+          <Pressable onPress={handleOpenMaps} style={styles.infoRow}>
             <MapPin size={16} color={theme.colors.accentBrand} style={{ marginRight: 10 }} />
             <Text
               style={[
@@ -89,9 +95,10 @@ export const PlaceDetailSheet = () => {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansRegular },
               ]}
             >
-              {selectedPlace.address || `${selectedPlace.city || 'Kyoto'}, Japan`}
+              {addressText}
             </Text>
-          </View>
+            <ExternalLink size={14} color={theme.colors.accentBrand} style={{ marginLeft: 6 }} />
+          </Pressable>
 
           {selectedPlace.hours && (
             <View style={styles.infoRow}>
@@ -170,7 +177,7 @@ const styles = StyleSheet.create({
   titleStack: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    justifyContent: 'space-between',
+    justify: 'space-between',
   },
   title: {
     fontSize: 24,

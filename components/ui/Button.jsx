@@ -116,6 +116,8 @@ export const Button = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={title || 'Button'}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       style={[getContainerStyle(), animatedStyle, style]}
     >
