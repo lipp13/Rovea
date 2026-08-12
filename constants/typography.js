@@ -9,16 +9,16 @@ export const fonts = {
 
 export const typography = {
   displayXl: {
-    fontSize: 36,
-    lineHeight: 44,
-    letterSpacing: -0.5,
+    fontSize: 38,
+    lineHeight: 46,
+    letterSpacing: -0.6,
     fontFamily: fonts.serifSemiBold,
   },
   displayLg: {
-    fontSize: 28,
-    lineHeight: 34,
-    letterSpacing: -0.3,
-    fontFamily: fonts.serifMedium,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.4,
+    fontFamily: fonts.serifSemiBold,
   },
   headingMd: {
     fontSize: 22,
@@ -40,7 +40,7 @@ export const typography = {
   },
   bodyRegular: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 22,
     letterSpacing: 0,
     fontFamily: fonts.sansRegular,
   },
@@ -51,9 +51,9 @@ export const typography = {
     fontFamily: fonts.sansMedium,
   },
   overline: {
-    fontSize: 11,
+    fontSize: 10,
     lineHeight: 14,
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
     fontFamily: fonts.sansSemiBold,
     textTransform: 'uppercase',
   },

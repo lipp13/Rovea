@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Pressable } from 'react-native';
 import { MapPin, Calendar, ArrowRight } from 'lucide-react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
 import { Button } from '../ui/Button';
 import { WeatherPill } from '../ui/WeatherPill';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
   const themeMode = useAppStore((state) => state.themeMode);
@@ -19,13 +22,8 @@ export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
         style={styles.imageBg}
         imageStyle={{ borderRadius: theme.radii.lg }}
       >
-        {/* Scrim Overlay */}
-        <View
-          style={[
-            styles.scrim,
-            { borderRadius: theme.radii.lg },
-          ]}
-        >
+        {/* Subtle Dark Scrim Overlay */}
+        <View style={[styles.scrim, { borderRadius: theme.radii.lg }]}>
           {/* Top Bar inside Hero */}
           <View style={styles.topBar}>
             <View style={styles.badge}>
@@ -39,14 +37,14 @@ export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
           {/* Bottom Content inside Hero */}
           <View style={styles.bottomContent}>
             <View style={styles.locationRow}>
-              <MapPin size={14} color="#E07A5F" style={{ marginRight: 4 }} />
+              <MapPin size={13} color="#E07A5F" style={{ marginRight: 4 }} />
               <Text style={styles.destinationText}>{trip.destination}</Text>
             </View>
 
             <Text style={styles.titleText}>{trip.title}</Text>
 
             <View style={styles.dateRow}>
-              <Calendar size={13} color="rgba(255,255,255,0.7)" style={{ marginRight: 6 }} />
+              <Calendar size={13} color="rgba(255,255,255,0.75)" style={{ marginRight: 6 }} />
               <Text style={styles.dateText}>
                 {trip.startDate} – {trip.endDate}
               </Text>
@@ -57,7 +55,7 @@ export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
               icon={ArrowRight}
               onPress={onPlanPress}
               variant="primary"
-              style={{ marginTop: 16 }}
+              style={{ marginTop: 18 }}
             />
           </View>
         </View>
@@ -68,9 +66,9 @@ export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 380,
+    height: 400,
     borderRadius: 16,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   imageBg: {
     width: '100%',
@@ -78,9 +76,9 @@ const styles = StyleSheet.create({
   },
   scrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.38)',
-    justify: 'space-between',
-    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.36)',
+    justifyContent: 'space-between',
+    padding: 22,
   },
   topBar: {
     flexDirection: 'row',
@@ -88,17 +86,18 @@ const styles = StyleSheet.create({
     justify: 'space-between',
   },
   badge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingVertical: 5,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   badgeText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
+    letterSpacing: 0.5,
   },
   bottomContent: {
     marginTop: 'auto',
@@ -106,19 +105,19 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   destinationText: {
     color: '#E07A5F',
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   titleText: {
     color: '#FFFFFF',
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 32,
+    lineHeight: 38,
     fontFamily: 'PlayfairDisplay_600SemiBold',
     marginBottom: 6,
   },

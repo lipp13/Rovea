@@ -18,7 +18,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
         styles.dockContainer,
         {
           bottom: Math.max(insets.bottom, 12),
-          backgroundColor: theme.colors.bgSurface,
+          backgroundColor: theme.colors.tabDockBg,
           borderColor: theme.colors.borderSubtle,
         },
         theme.shadows.floatingNav,
@@ -43,19 +43,19 @@ function CustomTabBar({ state, descriptors, navigation }) {
 
         const renderIcon = () => {
           const color = isFocused ? theme.colors.accentBrand : theme.colors.textSecondary;
-          const strokeWidth = isFocused ? 2.2 : 1.5;
+          const strokeWidth = isFocused ? 2.0 : 1.5;
 
           switch (route.name) {
             case 'index':
-              return <House size={22} color={color} strokeWidth={strokeWidth} />;
+              return <House size={20} color={color} strokeWidth={strokeWidth} />;
             case 'explore':
-              return <Compass size={22} color={color} strokeWidth={strokeWidth} />;
+              return <Compass size={20} color={color} strokeWidth={strokeWidth} />;
             case 'trips':
-              return <Luggage size={22} color={color} strokeWidth={strokeWidth} />;
+              return <Luggage size={20} color={color} strokeWidth={strokeWidth} />;
             case 'profile':
-              return <User size={22} color={color} strokeWidth={strokeWidth} />;
+              return <User size={20} color={color} strokeWidth={strokeWidth} />;
             default:
-              return <House size={22} color={color} strokeWidth={strokeWidth} />;
+              return <House size={20} color={color} strokeWidth={strokeWidth} />;
           }
         };
 
@@ -119,10 +119,10 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   dockContainer: {
     position: 'absolute',
-    left: 16,
-    right: 16,
-    height: 64,
-    borderRadius: 32,
+    left: 20,
+    right: 20,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -133,18 +133,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justify: 'center',
-    paddingVertical: 6,
+    paddingVertical: 4,
     position: 'relative',
   },
   tabLabel: {
-    fontSize: 11,
-    marginTop: 3,
+    fontSize: 10,
+    marginTop: 2,
+    letterSpacing: 0.2,
   },
   activeDot: {
     position: 'absolute',
-    bottom: 2,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    bottom: 1,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
   },
 });

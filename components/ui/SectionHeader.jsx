@@ -38,7 +38,7 @@ export const SectionHeader = ({
       {actionText && onActionPress && (
         <Pressable
           onPress={onActionPress}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text
             style={[
@@ -57,9 +57,9 @@ export const SectionHeader = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+    alignItems: 'baseline',
+    justify: 'space-between',
+    marginBottom: 18,
   },
   textStack: {
     flex: 1,

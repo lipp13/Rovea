@@ -1,26 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Pressable, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Pressable, Switch } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Moon, Sun, Bookmark, Settings, HardDrive, Shield, LogOut, ChevronRight } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { Moon, Sun, Bookmark, Settings, ShieldCheck, Info, ChevronRight, Heart } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
-import { SectionHeader } from '../../components/ui/SectionHeader';
-import { ProfileHeader } from '../../components/profile/ProfileHeader';
-import { SavedPlacesRow } from '../../components/home/SavedPlacesRow';
-import { Card } from '../../components/ui/Card';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const themeMode = useAppStore((state) => state.themeMode);
   const toggleTheme = useAppStore((state) => state.toggleTheme);
   const currentUser = useAppStore((state) => state.currentUser);
   const savedPlaces = useAppStore((state) => state.savedPlaces);
   const theme = getTheme(themeMode);
-
-  const handleOptionPress = (title) => {
-    Alert.alert(title, `${title} settings & preferences view.`);
-  };
 
   return (
     <ScrollView
@@ -31,167 +25,149 @@ export default function ProfileScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header Title */}
-      <Animated.View entering={FadeInUp.duration(400)} style={styles.headerStack}>
-        <Text
-          style={[
-            styles.overline,
-            { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-          ]}
-        >
-          TRAVEL PROFILE
-        </Text>
-        <Text
-          style={[
-            styles.title,
-            { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-          ]}
-        >
-          Traveler Journal
-        </Text>
-      </Animated.View>
-
-      {/* User Profile Header Component */}
-      <Animated.View entering={FadeInUp.duration(400).delay(100)}>
-        <ProfileHeader user={currentUser} />
-      </Animated.View>
-
-      {/* Bookmarked Spots Section */}
-      <Animated.View entering={FadeInDown.duration(400).delay(200)}>
-        <SectionHeader
-          overline="COLLECTION"
-          title={`Saved Spots (${savedPlaces.length})`}
-        />
-        <SavedPlacesRow
-          places={savedPlaces}
-          onPlacePress={(place) =>
-            Alert.alert(place.title, `${place.category} in ${place.city}`)
-          }
-        />
-      </Animated.View>
-
-      {/* App Preferences & Settings */}
-      <Animated.View entering={FadeInDown.duration(400).delay(300)} style={{ marginTop: 24 }}>
-        <SectionHeader overline="PREFERENCES" title="App Settings" />
-
-        <Card style={styles.settingsGroup} elevation="subtle">
-          {/* Theme Toggle Option */}
-          <View
-            style={[
-              styles.settingRow,
-              { borderBottomColor: theme.colors.borderSubtle, borderBottomWidth: 1 },
-            ]}
-          >
-            <View style={styles.settingLeft}>
-              {themeMode === 'light' ? (
-                <Moon size={18} color={theme.colors.textPrimary} style={styles.settingIcon} />
-              ) : (
-                <Sun size={18} color={theme.colors.accentBrand} style={styles.settingIcon} />
-              )}
-              <View>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium },
-                  ]}
-                >
-                  Appearance
-                </Text>
-                <Text
-                  style={[
-                    styles.settingSub,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  {themeMode === 'light' ? 'Warmed Sandstone (Light)' : 'Dusk Obsidian (Dark)'}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={themeMode === 'dark'}
-              onValueChange={toggleTheme}
-              trackColor={{ false: theme.colors.borderSubtle, true: theme.colors.accentBrand }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
-
-          {/* Offline Storage Info */}
-          <Pressable
-            onPress={() => handleOptionPress('Offline Cache & Storage')}
-            style={[
-              styles.settingRow,
-              { borderBottomColor: theme.colors.borderSubtle, borderBottomWidth: 1 },
-            ]}
-          >
-            <View style={styles.settingLeft}>
-              <HardDrive size={18} color={theme.colors.textPrimary} style={styles.settingIcon} />
-              <View>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium },
-                  ]}
-                >
-                  Offline Sync & Cache
-                </Text>
-                <Text
-                  style={[
-                    styles.settingSub,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  12 MB cached for offline trip access
-                </Text>
-              </View>
-            </View>
-            <ChevronRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
-
-          {/* Privacy & Safety */}
-          <Pressable
-            onPress={() => handleOptionPress('Privacy & Security')}
-            style={styles.settingRow}
-          >
-            <View style={styles.settingLeft}>
-              <Shield size={18} color={theme.colors.textPrimary} style={styles.settingIcon} />
-              <View>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium },
-                  ]}
-                >
-                  Privacy & Data
-                </Text>
-                <Text
-                  style={[
-                    styles.settingSub,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  Manage local permissions & backups
-                </Text>
-              </View>
-            </View>
-            <ChevronRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
-        </Card>
-
-        {/* Log Out Button */}
-        <Pressable
-          onPress={() => Alert.alert('Log Out', 'You are currently in guest/demo mode.')}
-          style={[styles.logoutButton, { borderColor: theme.colors.borderSubtle }]}
-        >
-          <LogOut size={16} color={theme.colors.destructive} style={{ marginRight: 8 }} />
+      {/* Header Profile Identity */}
+      <Animated.View entering={FadeInUp.duration(400)} style={styles.profileHeader}>
+        <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
+        <View style={styles.headerInfo}>
           <Text
             style={[
-              styles.logoutText,
-              { color: theme.colors.destructive, fontFamily: theme.fonts.sansMedium },
+              styles.userName,
+              { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
             ]}
           >
-            Sign Out
+            {currentUser.name}
           </Text>
-        </Pressable>
+          <Text
+            style={[
+              styles.userBio,
+              { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+            ]}
+          >
+            {currentUser.bio}
+          </Text>
+        </View>
+      </Animated.View>
+
+      {/* Stats Counter Strip */}
+      <Animated.View
+        entering={FadeInUp.duration(400).delay(100)}
+        style={[styles.statsRow, { borderBottomColor: theme.colors.borderSubtle }]}
+      >
+        <View style={styles.statItem}>
+          <Text
+            style={[
+              styles.statNumber,
+              { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+            ]}
+          >
+            {currentUser.tripsCount}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Trips</Text>
+        </View>
+        <View style={[styles.verticalDivider, { backgroundColor: theme.colors.borderSubtle }]} />
+        <View style={styles.statItem}>
+          <Text
+            style={[
+              styles.statNumber,
+              { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+            ]}
+          >
+            {currentUser.citiesCount}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Cities</Text>
+        </View>
+        <View style={[styles.verticalDivider, { backgroundColor: theme.colors.borderSubtle }]} />
+        <View style={styles.statItem}>
+          <Text
+            style={[
+              styles.statNumber,
+              { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+            ]}
+          >
+            {savedPlaces.length}
+          </Text>
+          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Saved</Text>
+        </View>
+      </Animated.View>
+
+      {/* Settings & Preferences List */}
+      <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.settingsSection}>
+        <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
+          PREFERENCES & IDENTITY
+        </Text>
+
+        {/* Dark Mode Toggle Row */}
+        <View style={[styles.settingRow, { borderBottomColor: theme.colors.borderSubtle }]}>
+          <View style={styles.settingLeft}>
+            {themeMode === 'dark' ? (
+              <Moon size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
+            ) : (
+              <Sun size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
+            )}
+            <Text
+              style={[
+                styles.settingLabel,
+                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
+              ]}
+            >
+              Dusk Obsidian Dark Mode
+            </Text>
+          </View>
+          <Switch
+            value={themeMode === 'dark'}
+            onValueChange={toggleTheme}
+            trackColor={{ false: '#D6CEBE', true: '#C25E38' }}
+            thumbColor="#FFFFFF"
+          />
+        </View>
+
+        {/* Saved Places Link */}
+        <View style={[styles.settingRow, { borderBottomColor: theme.colors.borderSubtle }]}>
+          <View style={styles.settingLeft}>
+            <Bookmark size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
+            <Text
+              style={[
+                styles.settingLabel,
+                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
+              ]}
+            >
+              Saved Bookmarks ({savedPlaces.length})
+            </Text>
+          </View>
+          <ChevronRight size={16} color={theme.colors.textSecondary} />
+        </View>
+
+        {/* Privacy & Guidelines */}
+        <View style={[styles.settingRow, { borderBottomColor: theme.colors.borderSubtle }]}>
+          <View style={styles.settingLeft}>
+            <ShieldCheck size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
+            <Text
+              style={[
+                styles.settingLabel,
+                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
+              ]}
+            >
+              Privacy & Data Policy
+            </Text>
+          </View>
+          <ChevronRight size={16} color={theme.colors.textSecondary} />
+        </View>
+
+        {/* About Rovea */}
+        <View style={styles.settingRow}>
+          <View style={styles.settingLeft}>
+            <Info size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
+            <Text
+              style={[
+                styles.settingLabel,
+                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
+              ]}
+            >
+              Rovea Travel Companion v1.0.0
+            </Text>
+          </View>
+          <ChevronRight size={16} color={theme.colors.textSecondary} />
+        </View>
       </Animated.View>
     </ScrollView>
   );
@@ -204,53 +180,71 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
   },
-  headerStack: {
-    marginBottom: 20,
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  overline: {
-    fontSize: 11,
-    letterSpacing: 1.5,
+  avatar: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    marginRight: 16,
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 24,
+    lineHeight: 28,
+    marginBottom: 4,
+  },
+  userBio: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justify: 'space-around',
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    marginBottom: 28,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 22,
     marginBottom: 2,
   },
-  title: {
-    fontSize: 30,
-    lineHeight: 36,
+  statLabel: {
+    fontSize: 12,
   },
-  settingsGroup: {
-    marginBottom: 16,
+  verticalDivider: {
+    width: 1,
+    height: 32,
+  },
+  settingsSection: {
+    marginBottom: 24,
+  },
+  sectionOverline: {
+    fontSize: 10,
+    letterSpacing: 1.2,
+    marginBottom: 12,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justify: 'space-between',
-    padding: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    paddingRight: 12,
   },
-  settingIcon: {
-    marginRight: 12,
-  },
-  settingTitle: {
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  settingSub: {
-    fontSize: 11,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justify: 'center',
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderRadius: 24,
-    marginBottom: 20,
-  },
-  logoutText: {
-    fontSize: 14,
+  settingLabel: {
+    fontSize: 16,
   },
 });

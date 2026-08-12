@@ -6,6 +6,7 @@ export const spacing = {
   lg: 24,
   xl: 32,
   xxl: 48,
+  xxxl: 64,
 };
 
 export const radii = {
@@ -22,24 +23,24 @@ export const shadows = {
     elevation: 0,
   },
   subtle: {
-    shadowColor: '#1C1917',
+    shadowColor: '#1A1816',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1,
   },
   card: {
-    shadowColor: '#1C1917',
+    shadowColor: '#1A1816',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    elevation: 2,
   },
   floatingNav: {
-    shadowColor: '#1C1917',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 6,
   },
 };

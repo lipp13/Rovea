@@ -19,27 +19,21 @@ export default function HomeScreen() {
   const currentUser = useAppStore((state) => state.currentUser);
   const activeTrip = useAppStore((state) => state.activeTrip);
   const savedPlaces = useAppStore((state) => state.savedPlaces);
+  const openModal = useAppStore((state) => state.openModal);
   const theme = getTheme(themeMode);
 
   const handlePlanPress = () => {
-    Alert.alert(
-      "Today's Itinerary",
-      `Day ${activeTrip.currentDay} in Kyoto:\n\n1. Nishiki Market (09:30 AM)\n2. Kissa Soiree (12:00 PM)\n3. Fushimi Inari Shrine (02:30 PM)\n4. Gion Evening Walk (06:00 PM)`
-    );
+    router.push('/itinerary');
   };
 
   const handleWeatherPress = () => {
-    Alert.alert(
-      'Kyoto Weather Forecast',
-      'Today: 21°C • Clear & Sunny\nHigh: 24° • Low: 14°\nHumidity: 48%\n\nPerfect weather for outdoor shrine walks and garden visits.'
-    );
+    openModal('weather');
   };
 
   const handleNextActivityPress = () => {
-    Alert.alert(
-      'Fushimi Inari Shrine',
-      'Scheduled for 02:30 PM today.\n\n"Walk past the main gates up to the Yotsutsuji intersection for panoramic views of Kyoto at sunset."'
-    );
+    if (activeTrip?.nextActivity) {
+      openModal('placeDetail', { place: activeTrip.nextActivity });
+    }
   };
 
   return (
@@ -51,13 +45,13 @@ export default function HomeScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Top Editorial Greeting */}
+      {/* Editorial Top Greeting */}
       <Animated.View entering={FadeInUp.duration(400)} style={styles.headerStack}>
         <View style={styles.greetingRow}>
           <Text style={[styles.greetingTag, { color: theme.colors.accentBrand }]}>
             CURRENT JOURNEY
           </Text>
-          <Sparkles size={14} color={theme.colors.accentBrand} />
+          <Sparkles size={13} color={theme.colors.accentBrand} />
         </View>
         <Text
           style={[
@@ -73,12 +67,12 @@ export default function HomeScreen() {
             { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
           ]}
         >
-          You're on Day {activeTrip?.currentDay} of your Kyoto adventure.
+          Day {activeTrip?.currentDay} of 7 in Kyoto • Autumn Foliage Season
         </Text>
       </Animated.View>
 
-      {/* Active Trip Hero (Visual Benchmark) */}
-      <Animated.View entering={FadeInUp.duration(500).delay(100)}>
+      {/* Large Hero Photography Card */}
+      <Animated.View entering={FadeInUp.duration(400).delay(100)}>
         <ActiveTripHero
           trip={activeTrip}
           onPlanPress={handlePlanPress}
@@ -86,12 +80,12 @@ export default function HomeScreen() {
         />
       </Animated.View>
 
-      {/* Next Up Activity Section */}
-      <Animated.View entering={FadeInDown.duration(400).delay(200)}>
+      {/* Up Next Activity (Whitespace & 1px Hairline Divider) */}
+      <Animated.View entering={FadeInDown.duration(400).delay(200)} style={{ marginBottom: 32 }}>
         <SectionHeader
           overline="NEXT SCHEDULED SPOT"
           title="Up next today"
-          actionText="View All (4)"
+          actionText="View Full Plan"
           onActionPress={handlePlanPress}
         />
         <NextActivityCard
@@ -100,35 +94,24 @@ export default function HomeScreen() {
         />
       </Animated.View>
 
-      {/* Saved Places Carousel */}
-      <Animated.View entering={FadeInDown.duration(400).delay(300)}>
+      {/* Saved Places Section */}
+      <Animated.View entering={FadeInDown.duration(400).delay(300)} style={{ marginBottom: 32 }}>
         <SectionHeader
-          overline="BOOKMARKS"
-          title="Saved spots in Japan"
+          overline="SAVED SPOTS"
+          title="Bookmarked destinations"
           actionText="See All"
           onActionPress={() => router.push('/(tabs)/profile')}
         />
         <SavedPlacesRow
           places={savedPlaces}
-          onPlacePress={(place) =>
-            Alert.alert(place.title, `${place.category} in ${place.city} • Rating ${place.rating}`)
-          }
+          onPlacePress={(place) => openModal('placeDetail', { place })}
         />
       </Animated.View>
 
-      {/* Discover More Editorial Callout */}
-      <Animated.View entering={FadeInDown.duration(400).delay(400)} style={{ marginTop: 24 }}>
-        <View
-          style={[
-            styles.editorialCallout,
-            {
-              backgroundColor: theme.colors.bgSubtle,
-              borderColor: theme.colors.borderSubtle,
-              borderRadius: theme.radii.lg,
-            },
-          ]}
-        >
-          <Compass size={24} color={theme.colors.accentBrand} style={{ marginBottom: 8 }} />
+      {/* Editorial Discover Callout */}
+      <Animated.View entering={FadeInDown.duration(400).delay(400)} style={{ marginBottom: 24 }}>
+        <View style={[styles.editorialCallout, { borderTopColor: theme.colors.borderSubtle }]}>
+          <Compass size={24} color={theme.colors.accentBrand} style={{ marginBottom: 10 }} />
           <Text
             style={[
               styles.calloutTitle,
@@ -143,13 +126,13 @@ export default function HomeScreen() {
               { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
             ]}
           >
-            Explore curated guides for Positano, Reykjavik, and the Cotswolds in our editorial collection.
+            Explore handpicked guides for Positano, Reykjavik, and the Cotswolds in our editorial collection.
           </Text>
           <Button
             title="Explore Destinations"
             onPress={() => router.push('/(tabs)/explore')}
             variant="secondary"
-            style={{ marginTop: 12 }}
+            style={{ marginTop: 14 }}
           />
         </View>
       </Animated.View>
@@ -165,7 +148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerStack: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   greetingRow: {
     flexDirection: 'row',
@@ -173,30 +156,29 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   greetingTag: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1.5,
     marginRight: 6,
   },
   greetingTitle: {
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 32,
+    lineHeight: 38,
     marginBottom: 4,
   },
   greetingSubtitle: {
     fontSize: 14,
   },
   editorialCallout: {
-    padding: 20,
-    borderWidth: 1,
-    marginBottom: 20,
+    paddingTop: 24,
+    borderTopWidth: 1,
   },
   calloutTitle: {
-    fontSize: 20,
+    fontSize: 22,
     marginBottom: 4,
   },
   calloutDesc: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
