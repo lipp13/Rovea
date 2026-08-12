@@ -16,6 +16,10 @@ import {
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
 
+import { PlaceDetailSheet } from '../components/sheets/PlaceDetailSheet';
+import { AddPlaceSheet } from '../components/sheets/AddPlaceSheet';
+import { WeatherDetailSheet } from '../components/sheets/WeatherDetailSheet';
+
 export default function RootLayout() {
   const themeMode = useAppStore((state) => state.themeMode);
   const theme = getTheme(themeMode);
@@ -50,7 +54,18 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="destination-detail" />
+        <Stack.Screen name="create-trip" />
+        <Stack.Screen name="trip-overview" />
+        <Stack.Screen name="itinerary" />
+        <Stack.Screen name="expense-tracker" />
+        <Stack.Screen name="packing-checklist" />
       </Stack>
+
+      {/* Global Phase 2 Modal Sheets */}
+      <PlaceDetailSheet />
+      <AddPlaceSheet />
+      <WeatherDetailSheet />
     </View>
   );
 }
