@@ -1,25 +1,50 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Pressable } from 'react-native';
 import { MapPin, Calendar, ArrowRight } from 'lucide-react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  withSpring,
+  Easing,
+} from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
 import { Button } from '../ui/Button';
 import { WeatherPill } from '../ui/WeatherPill';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground);
 
 export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
   const themeMode = useAppStore((state) => state.themeMode);
   const theme = getTheme(themeMode);
 
+  const imageScale = useSharedValue(1.03);
+  const imageOpacity = useSharedValue(0.2);
+
+  useEffect(() => {
+    imageScale.value = withTiming(1.0, {
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+    });
+    imageOpacity.value = withTiming(1.0, {
+      duration: 600,
+      easing: Easing.ease,
+    });
+  }, []);
+
+  const animatedImageStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: imageScale.value }],
+    opacity: imageOpacity.value,
+  }));
+
   if (!trip) return null;
 
   return (
     <View style={[styles.container, theme.shadows.card]}>
-      <ImageBackground
+      <AnimatedImageBackground
         source={{ uri: trip.coverImage }}
-        style={styles.imageBg}
+        style={[styles.imageBg, animatedImageStyle]}
         imageStyle={{ borderRadius: theme.radii.lg }}
       >
         {/* Subtle Dark Scrim Overlay */}
@@ -28,7 +53,7 @@ export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
           <View style={styles.topBar}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                Day {trip.currentDay} of {trip.totalDays}
+                Day {trip.currentDay || 3} of {trip.totalDays || 7}
               </Text>
             </View>
             <WeatherPill weather={trip.weather} onPress={onWeatherPress} />
@@ -59,16 +84,17 @@ export const ActiveTripHero = ({ trip, onPlanPress, onWeatherPress }) => {
             />
           </View>
         </View>
-      </ImageBackground>
+      </AnimatedImageBackground>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    height: 400,
+    height: 420,
     borderRadius: 16,
     marginBottom: 32,
+    overflow: 'hidden',
   },
   imageBg: {
     width: '100%',
@@ -77,7 +103,7 @@ const styles = StyleSheet.create({
   scrim: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.36)',
-    justifyContent: 'space-between',
+    justify: 'space-between',
     padding: 22,
   },
   topBar: {
@@ -116,8 +142,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: '#FFFFFF',
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 34,
+    lineHeight: 40,
     fontFamily: 'PlayfairDisplay_600SemiBold',
     marginBottom: 6,
   },

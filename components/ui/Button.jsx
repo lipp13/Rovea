@@ -16,6 +16,7 @@ export const Button = ({
   textStyle,
   disabled = false,
   fullWidth = true,
+  accessibilityLabel,
 }) => {
   const themeMode = useAppStore((state) => state.themeMode);
   const theme = getTheme(themeMode);
@@ -26,11 +27,11 @@ export const Button = ({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(0.96, { damping: 15, stiffness: 350 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(1, { damping: 15, stiffness: 350 });
   };
 
   const handlePress = () => {
@@ -50,7 +51,7 @@ export const Button = ({
       case 'primary':
         return [
           ...base,
-          { backgroundColor: theme.colors.accentBrand, height: 52 },
+          { backgroundColor: theme.colors.accentBrand, height: 54 },
           disabled && { opacity: 0.5 },
         ];
       case 'secondary':
@@ -92,6 +93,7 @@ export const Button = ({
           color: '#FFFFFF',
           fontFamily: theme.fonts.sansSemiBold,
           fontSize: 15,
+          letterSpacing: 0.2,
         };
       case 'secondary':
         return {
@@ -117,7 +119,7 @@ export const Button = ({
       onPressOut={handlePressOut}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={title || 'Button'}
+      accessibilityLabel={accessibilityLabel || title || 'Button'}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       style={[getContainerStyle(), animatedStyle, style]}
     >
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
   baseButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
     paddingHorizontal: 24,
     minHeight: 44,
   },
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
   },
   iconMargin: {
     marginRight: 8,

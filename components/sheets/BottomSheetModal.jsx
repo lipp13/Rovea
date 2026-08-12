@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { Modal, View, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
@@ -23,14 +23,14 @@ export const BottomSheetModal = ({ visible, onClose, children, maxContainerHeigh
     >
       <View style={styles.overlay}>
         {/* Backdrop Scrim */}
-        <Animated.View entering={FadeIn.duration(200)} style={styles.backdrop}>
+        <Animated.View entering={FadeIn.duration(220)} style={styles.backdrop}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
 
         {/* Sheet Content Container */}
         <Animated.View
-          entering={SlideInDown.duration(300)}
-          exiting={SlideOutDown.duration(250)}
+          entering={SlideInDown.springify().damping(22).stiffness(240)}
+          exiting={SlideOutDown.duration(200)}
           style={[
             styles.sheetContainer,
             {
@@ -47,6 +47,8 @@ export const BottomSheetModal = ({ visible, onClose, children, maxContainerHeigh
             <View style={[styles.handleBar, { backgroundColor: theme.colors.borderStrong }]} />
             <Pressable
               onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close dialog"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               style={styles.closeButton}
             >
@@ -65,7 +67,7 @@ export const BottomSheetModal = ({ visible, onClose, children, maxContainerHeigh
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justify: 'flex-end',
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   handleBar: {
-    width: 36,
+    width: 38,
     height: 4,
     borderRadius: 2,
   },
