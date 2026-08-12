@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Compass, Sparkles, MapPin } from 'lucide-react-native';
+import { Compass, Sparkles } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
@@ -42,25 +42,20 @@ export default function HomeScreen() {
       style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 },
+        { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Editorial Top Greeting */}
-      <Animated.View entering={FadeInUp.duration(400)} style={styles.headerStack}>
-        <View style={styles.greetingRow}>
-          <Text style={[styles.greetingTag, { color: theme.colors.accentBrand }]}>
-            CURRENT JOURNEY
-          </Text>
-          <Sparkles size={13} color={theme.colors.accentBrand} />
-        </View>
+      {/* Greeting */}
+      <Animated.View entering={FadeInUp.duration(450)} style={styles.headerStack}>
         <Text
           style={[
             styles.greetingTitle,
             { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
           ]}
         >
-          Good morning, {currentUser?.name?.split(' ')[0] || 'Traveler'}
+          Good morning,{'\n'}
+          {currentUser?.name?.split(' ')[0] || 'Traveler'}
         </Text>
         <Text
           style={[
@@ -68,12 +63,24 @@ export default function HomeScreen() {
             { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
           ]}
         >
-          Day {activeTrip?.currentDay} of 7 in Kyoto • Autumn Foliage Season
+          {activeTrip
+            ? `Day ${activeTrip?.currentDay || 3} of ${activeTrip?.totalDays || 7} in ${activeTrip?.destination || 'Kyoto'}`
+            : 'Where will you go next?'}
         </Text>
       </Animated.View>
 
-      {/* Large Hero Photography Card */}
-      <Animated.View entering={FadeInUp.duration(400).delay(100)}>
+      {/* Current Journey Label */}
+      {activeTrip && (
+        <Animated.View entering={FadeInUp.duration(400).delay(60)} style={styles.journeyLabel}>
+          <Sparkles size={12} color={theme.colors.accentBrand} style={{ marginRight: 6 }} />
+          <Text style={[styles.journeyLabelText, { color: theme.colors.accentBrand }]}>
+            CURRENT JOURNEY
+          </Text>
+        </Animated.View>
+      )}
+
+      {/* Hero Photography */}
+      <Animated.View entering={FadeInUp.duration(500).delay(120)}>
         <ActiveTripHero
           trip={activeTrip}
           onPlanPress={handlePlanPress}
@@ -81,12 +88,12 @@ export default function HomeScreen() {
         />
       </Animated.View>
 
-      {/* Up Next Activity (Whitespace & 1px Hairline Divider) */}
-      <Animated.View entering={FadeInDown.duration(400).delay(200)} style={{ marginBottom: 32 }}>
+      {/* Up Next */}
+      <Animated.View entering={FadeInDown.duration(400).delay(240)} style={styles.sectionSpacing}>
         <SectionHeader
-          overline="NEXT SCHEDULED SPOT"
+          overline="NEXT"
           title="Up next today"
-          actionText="View Full Plan"
+          actionText="View Plan"
           onActionPress={handlePlanPress}
         />
         <NextActivityCard
@@ -95,11 +102,11 @@ export default function HomeScreen() {
         />
       </Animated.View>
 
-      {/* Saved Places Section */}
-      <Animated.View entering={FadeInDown.duration(400).delay(300)} style={{ marginBottom: 32 }}>
+      {/* Saved Places */}
+      <Animated.View entering={FadeInDown.duration(400).delay(340)} style={styles.sectionSpacing}>
         <SectionHeader
-          overline="SAVED SPOTS"
-          title="Bookmarked destinations"
+          overline="SAVED"
+          title="Bookmarked places"
           actionText="See All"
           onActionPress={() => router.push('/(tabs)/profile')}
         />
@@ -109,10 +116,10 @@ export default function HomeScreen() {
         />
       </Animated.View>
 
-      {/* Editorial Discover Callout */}
-      <Animated.View entering={FadeInDown.duration(400).delay(400)} style={{ marginBottom: 24 }}>
+      {/* Editorial Callout */}
+      <Animated.View entering={FadeInDown.duration(400).delay(440)} style={styles.sectionSpacing}>
         <View style={[styles.editorialCallout, { borderTopColor: theme.colors.borderSubtle }]}>
-          <Compass size={24} color={theme.colors.accentBrand} style={{ marginBottom: 10 }} />
+          <Compass size={22} color={theme.colors.accentBrand} style={{ marginBottom: 12 }} />
           <Text
             style={[
               styles.calloutTitle,
@@ -127,13 +134,13 @@ export default function HomeScreen() {
               { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
             ]}
           >
-            Explore handpicked guides for Positano, Reykjavik, and the Cotswolds in our editorial collection.
+            Explore handpicked guides for Positano, Reykjavik, and the Cotswolds.
           </Text>
           <Button
             title="Explore Destinations"
             onPress={() => router.push('/(tabs)/explore')}
             variant="secondary"
-            style={{ marginTop: 14 }}
+            style={{ marginTop: 16 }}
           />
         </View>
       </Animated.View>
@@ -146,40 +153,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   headerStack: {
-    marginBottom: 24,
-  },
-  greetingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  greetingTag: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-    marginRight: 6,
+    marginBottom: 20,
   },
   greetingTitle: {
-    fontSize: 32,
-    lineHeight: 38,
-    marginBottom: 4,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.3,
+    marginBottom: 6,
   },
   greetingSubtitle: {
     fontSize: 14,
+    lineHeight: 20,
+  },
+  journeyLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  journeyLabelText: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+  },
+  sectionSpacing: {
+    marginBottom: 40,
   },
   editorialCallout: {
-    paddingTop: 24,
-    borderTopWidth: 1,
+    paddingTop: 32,
+    borderTopWidth: 0.5,
   },
   calloutTitle: {
     fontSize: 22,
-    marginBottom: 4,
+    lineHeight: 28,
+    marginBottom: 6,
   },
   calloutDesc: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
   },
 });

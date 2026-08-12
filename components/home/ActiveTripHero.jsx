@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
   scrim: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.36)',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     padding: 22,
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
   },
   badge: {
     backgroundColor: 'rgba(0, 0, 0, 0.4)',

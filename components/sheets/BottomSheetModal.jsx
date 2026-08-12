@@ -67,7 +67,7 @@ export const BottomSheetModal = ({ visible, onClose, children, maxContainerHeigh
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justify: 'flex-end',
+    justifyContent: 'flex-end',
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -76,7 +76,9 @@ const styles = StyleSheet.create({
   sheetContainer: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    borderWidth: 1,
+    borderTopWidth: 0.5,
+    borderLeftWidth: 0.5,
+    borderRightWidth: 0.5,
     overflow: 'hidden',
   },
   handleContainer: {

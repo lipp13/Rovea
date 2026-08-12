@@ -1,12 +1,44 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Calendar, Sun, Wallet, CheckSquare, Clock, ChevronRight, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Clock, Wallet, CheckSquare, Sun, ChevronRight, Trash2 } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
-import { Button } from '../components/ui/Button';
+
+function TripToolRow({ icon: Icon, label, title, subtitle, onPress, theme, isLast }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={[
+        styles.hubRowItem,
+        !isLast && { borderBottomWidth: 0.5, borderBottomColor: theme.colors.borderSubtle },
+      ]}
+    >
+      <View style={styles.hubItemLeft}>
+        <View style={[styles.iconCircle, { backgroundColor: theme.colors.accentSubtle }]}>
+          <Icon size={18} color={theme.colors.accentBrand} />
+        </View>
+        <View style={styles.hubTextStack}>
+          <Text
+            style={[styles.hubTitle, { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium }]}
+          >
+            {title}
+          </Text>
+          <Text
+            style={[styles.hubSubtext, { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular }]}
+          >
+            {subtitle}
+          </Text>
+        </View>
+      </View>
+      <ChevronRight size={16} color={theme.colors.textMuted} />
+    </Pressable>
+  );
+}
 
 export default function TripOverviewScreen() {
   const insets = useSafeAreaInsets();
@@ -22,7 +54,6 @@ export default function TripOverviewScreen() {
   const openModal = useAppStore((state) => state.openModal);
   const theme = getTheme(themeMode);
 
-  // Dynamic trip lookup
   const targetId = params.id || activeTripId;
   const activeTrip = trips.find((t) => t.id === targetId) || getActiveTrip();
 
@@ -39,203 +70,93 @@ export default function TripOverviewScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Large Editorial Trip Photography Hero */}
+        {/* Hero Photography */}
         <View style={styles.heroImageContainer}>
           <Image source={{ uri: activeTrip.coverImage }} style={styles.heroImage} />
 
-          {/* Top Bar Navigation */}
+          {/* Nav */}
           <View style={[styles.navHeader, { paddingTop: insets.top + 8 }]}>
             <Pressable
               onPress={() => router.back()}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              style={styles.backBtn}
+              style={styles.navBtn}
             >
               <ArrowLeft size={20} color="#FFFFFF" />
             </Pressable>
-
             <Pressable
               onPress={handleDelete}
+              accessibilityRole="button"
+              accessibilityLabel="Delete trip"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              style={styles.backBtn}
+              style={styles.navBtn}
             >
               <Trash2 size={18} color="#FFFFFF" />
             </Pressable>
           </View>
 
-          {/* Scrim Title Content */}
+          {/* Hero Text */}
           <View style={styles.heroScrimContent}>
-            <View style={styles.badgeRow}>
-              <View style={styles.dayBadge}>
-                <Text style={styles.dayBadgeText}>
-                  Day {activeTrip.currentDay || 1} of {activeTrip.totalDays || 7}
-                </Text>
-              </View>
+            <View style={styles.dayBadge}>
+              <Text style={styles.dayBadgeText}>
+                Day {activeTrip.currentDay || 1} of {activeTrip.totalDays || 7}
+              </Text>
             </View>
             <Text style={styles.destinationHeader}>{activeTrip.destination.toUpperCase()}</Text>
             <Text style={styles.tripTitleText}>{activeTrip.title}</Text>
             <Text style={styles.dateRangeText}>
-              {activeTrip.startDate} — {activeTrip.endDate}, {activeTrip.year || '2026'}
+              {activeTrip.startDate} — {activeTrip.endDate}
             </Text>
           </View>
         </View>
 
-        {/* Editorial Content Hub (Typography & Hairline Dividers - No Heavy Cards) */}
+        {/* Trip Tools */}
         <View style={styles.bodyContent}>
-          {/* Section 1: Today's Plan */}
-          <Pressable
-            onPress={() => router.push('/itinerary')}
-            style={[styles.hubRowItem, { borderBottomColor: theme.colors.borderSubtle }]}
-          >
-            <View style={styles.hubItemLeft}>
-              <View style={styles.iconContainer}>
-                <Clock size={20} color={theme.colors.accentBrand} />
-              </View>
-              <View style={styles.hubTextStack}>
-                <Text
-                  style={[
-                    styles.hubLabel,
-                    { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-                  ]}
-                >
-                  TODAY'S ITINERARY
-                </Text>
-                <Text
-                  style={[
-                    styles.hubTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                  ]}
-                >
-                  Day 0{activeTrip.currentDay || 3} — {activeTrip.currentDateLabel || 'October 14'}
-                </Text>
-                <Text
-                  style={[
-                    styles.hubSubtext,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  Daily spots scheduled • Up next: {activeTrip.nextActivity?.title || 'Exploration'}
-                </Text>
-              </View>
-            </View>
-            <ChevronRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
+          <Animated.View entering={FadeInUp.duration(400)}>
+            <Text style={[styles.toolsSectionLabel, { color: theme.colors.accentBrand }]}>
+              TRIP TOOLS
+            </Text>
+          </Animated.View>
 
-          {/* Section 2: Expense Tracker */}
-          <Pressable
-            onPress={() => router.push('/expenses')}
-            style={[styles.hubRowItem, { borderBottomColor: theme.colors.borderSubtle }]}
+          <Animated.View
+            entering={FadeInDown.duration(400).delay(80)}
+            style={[styles.toolsCard, { backgroundColor: theme.colors.bgSurface, borderColor: theme.colors.borderSubtle }]}
           >
-            <View style={styles.hubItemLeft}>
-              <View style={styles.iconContainer}>
-                <Wallet size={20} color={theme.colors.accentBrand} />
-              </View>
-              <View style={styles.hubTextStack}>
-                <Text
-                  style={[
-                    styles.hubLabel,
-                    { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-                  ]}
-                >
-                  EXPENSE TRACKER
-                </Text>
-                <Text
-                  style={[
-                    styles.hubTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                  ]}
-                >
-                  {expenseTracker.spentFormatted} spent of {expenseTracker.budgetFormatted}
-                </Text>
-                <Text
-                  style={[
-                    styles.hubSubtext,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  {expenseTracker.transactions.length} transactions logged
-                </Text>
-              </View>
-            </View>
-            <ChevronRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
-
-          {/* Section 3: Packing Checklist */}
-          <Pressable
-            onPress={() => router.push('/packing')}
-            style={[styles.hubRowItem, { borderBottomColor: theme.colors.borderSubtle }]}
-          >
-            <View style={styles.hubItemLeft}>
-              <View style={styles.iconContainer}>
-                <CheckSquare size={20} color={theme.colors.accentBrand} />
-              </View>
-              <View style={styles.hubTextStack}>
-                <Text
-                  style={[
-                    styles.hubLabel,
-                    { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-                  ]}
-                >
-                  PACKING CHECKLIST
-                </Text>
-                <Text
-                  style={[
-                    styles.hubTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                  ]}
-                >
-                  {packingChecklist.packedCount} of {packingChecklist.totalItems} items packed
-                </Text>
-                <Text
-                  style={[
-                    styles.hubSubtext,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  {Math.round((packingChecklist.packedCount / (packingChecklist.totalItems || 1)) * 100)}% progress complete
-                </Text>
-              </View>
-            </View>
-            <ChevronRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
-
-          {/* Section 4: Weather Overview */}
-          <Pressable
-            onPress={() => openModal('weather')}
-            style={styles.hubRowItem}
-          >
-            <View style={styles.hubItemLeft}>
-              <View style={styles.iconContainer}>
-                <Sun size={20} color={theme.colors.accentBrand} />
-              </View>
-              <View style={styles.hubTextStack}>
-                <Text
-                  style={[
-                    styles.hubLabel,
-                    { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-                  ]}
-                >
-                  LOCAL WEATHER
-                </Text>
-                <Text
-                  style={[
-                    styles.hubTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                  ]}
-                >
-                  {activeTrip.weather?.temp} • {activeTrip.weather?.condition}
-                </Text>
-                <Text
-                  style={[
-                    styles.hubSubtext,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  High {activeTrip.weather?.high} • Low {activeTrip.weather?.low}
-                </Text>
-              </View>
-            </View>
-            <ChevronRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
+            <TripToolRow
+              icon={Clock}
+              label="Today's Itinerary"
+              title={`Day 0${activeTrip.currentDay || 3} Itinerary`}
+              subtitle={`Up next: ${activeTrip.nextActivity?.title || 'Exploration'}`}
+              onPress={() => router.push('/itinerary')}
+              theme={theme}
+            />
+            <TripToolRow
+              icon={Wallet}
+              label="Expense Tracker"
+              title={`${expenseTracker.spentFormatted} spent`}
+              subtitle={`of ${expenseTracker.budgetFormatted} budget`}
+              onPress={() => router.push('/expense-tracker')}
+              theme={theme}
+            />
+            <TripToolRow
+              icon={CheckSquare}
+              label="Packing Checklist"
+              title={`${packingChecklist.packedCount} of ${packingChecklist.totalItems} packed`}
+              subtitle={`${Math.round((packingChecklist.packedCount / (packingChecklist.totalItems || 1)) * 100)}% complete`}
+              onPress={() => router.push('/packing-checklist')}
+              theme={theme}
+            />
+            <TripToolRow
+              icon={Sun}
+              label="Local Weather"
+              title={`${activeTrip.weather?.temp || '18°C'} · ${activeTrip.weather?.condition || 'Clear'}`}
+              subtitle={`High ${activeTrip.weather?.high || '22°C'} · Low ${activeTrip.weather?.low || '14°C'}`}
+              onPress={() => openModal('weather')}
+              theme={theme}
+              isLast
+            />
+          </Animated.View>
         </View>
       </ScrollView>
     </View>
@@ -247,7 +168,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroImageContainer: {
-    height: 360,
+    height: 380,
     width: '100%',
     position: 'relative',
   },
@@ -261,92 +182,102 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
   },
-  backBtn: {
+  navBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   heroScrimContent: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
+    bottom: 24,
+    left: 24,
+    right: 24,
   },
   dayBadge: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    paddingHorizontal: 12,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   dayBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
+    letterSpacing: 0.5,
   },
   destinationHeader: {
     color: '#E07A5F',
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '600',
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   tripTitleText: {
     color: '#FFFFFF',
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 30,
+    lineHeight: 36,
     fontFamily: 'PlayfairDisplay_600SemiBold',
+    letterSpacing: -0.3,
     marginBottom: 4,
   },
   dateRangeText: {
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255,255,255,0.8)',
     fontSize: 13,
   },
   bodyContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+  },
+  toolsSectionLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    marginBottom: 14,
+  },
+  toolsCard: {
+    borderRadius: 14,
+    borderWidth: 0.5,
+    overflow: 'hidden',
   },
   hubRowItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
-    paddingVertical: 20,
-    borderBottomWidth: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    minHeight: 56,
   },
   hubItemLeft: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     flex: 1,
     paddingRight: 12,
   },
-  iconContainer: {
-    marginRight: 14,
-    marginTop: 2,
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   hubTextStack: {
     flex: 1,
   },
-  hubLabel: {
-    fontSize: 10,
-    letterSpacing: 1.2,
-    marginBottom: 4,
-  },
   hubTitle: {
-    fontSize: 20,
-    lineHeight: 24,
-    marginBottom: 4,
+    fontSize: 15,
+    marginBottom: 2,
   },
   hubSubtext: {
-    fontSize: 13,
+    fontSize: 12,
   },
 });

@@ -229,6 +229,6 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
 });

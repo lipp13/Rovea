@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   tempMainRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   largeTemp: {
     fontSize: 64,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   conditionMeta: {
-    justify: 'center',
+    justifyContent: 'center',
   },
   conditionText: {
     fontSize: 16,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   divider: {
-    height: 1,
+    height: 0.5,
     width: '100%',
     marginVertical: 16,
   },
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 0.5,
     marginRight: 10,
   },
   hourlyTime: {
@@ -228,9 +228,9 @@ const styles = StyleSheet.create({
   weeklyRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     paddingVertical: 12,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
   },
   weeklyDay: {
     fontSize: 14,

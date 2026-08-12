@@ -16,11 +16,14 @@ export const Chip = ({ label, active = false, onPress, icon: Icon, style }) => {
   return (
     <Pressable
       onPress={handlePress}
-      hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: active }}
+      hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
       style={[
         styles.chip,
         {
-          backgroundColor: active ? theme.colors.accentBrand : theme.colors.bgSubtle,
+          backgroundColor: active ? theme.colors.accentBrand : 'transparent',
           borderColor: active ? theme.colors.accentBrand : theme.colors.borderSubtle,
           borderRadius: theme.radii.pill,
         },
@@ -29,7 +32,7 @@ export const Chip = ({ label, active = false, onPress, icon: Icon, style }) => {
     >
       {Icon && (
         <Icon
-          size={14}
+          size={13}
           color={active ? '#FFFFFF' : theme.colors.textSecondary}
           style={styles.iconMargin}
         />
@@ -54,14 +57,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 7,
     borderWidth: 1,
     marginRight: 8,
   },
   label: {
     fontSize: 13,
+    letterSpacing: 0.1,
   },
   iconMargin: {
-    marginRight: 6,
+    marginRight: 5,
   },
 });

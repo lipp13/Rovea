@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Plus, Clock, MapPin, ChevronRight, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
@@ -42,40 +42,54 @@ export default function DailyItineraryScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}>
-      {/* Top Header Bar */}
+      {/* Header */}
       <View style={[styles.headerNav, { paddingTop: insets.top + 12 }]}>
         <Pressable
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <ArrowLeft size={22} color={theme.colors.textPrimary} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold }]}>
-          Daily Itinerary
+        <Text
+          style={[
+            styles.headerTitle,
+            { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+          ]}
+        >
+          Itinerary
         </Text>
         <Pressable
           onPress={handleAddPlace}
+          accessibilityRole="button"
+          accessibilityLabel="Add place"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={styles.addNavBtn}
+          style={[styles.addNavBtn, { backgroundColor: theme.colors.accentSubtle }]}
         >
-          <Plus size={20} color={theme.colors.accentBrand} />
+          <Plus size={18} color={theme.colors.accentBrand} />
         </Pressable>
       </View>
 
-      {/* Horizontal Day Selector Strip */}
+      {/* Day Selector Strip */}
       <View style={[styles.dayStripWrapper, { borderBottomColor: theme.colors.borderSubtle }]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayScrollContent}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dayScrollContent}
+        >
           {itineraryDays.map((day) => {
             const isActive = day.dayNumber === selectedDayNumber;
             return (
               <Pressable
                 key={day.dayNumber}
                 onPress={() => handleDaySelect(day.dayNumber)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: isActive }}
+                accessibilityLabel={`Day ${day.dayNumber}`}
                 style={[
                   styles.dayTab,
-                  {
-                    borderBottomColor: isActive ? theme.colors.accentBrand : 'transparent',
-                  },
+                  { borderBottomColor: isActive ? theme.colors.accentBrand : 'transparent' },
                 ]}
               >
                 <Text
@@ -87,7 +101,7 @@ export default function DailyItineraryScreen() {
                     },
                   ]}
                 >
-                  DAY {day.dayNumber < 10 ? `0${day.dayNumber}` : day.dayNumber}
+                  {day.dayNumber < 10 ? `0${day.dayNumber}` : day.dayNumber}
                 </Text>
                 <Text
                   style={[
@@ -106,15 +120,15 @@ export default function DailyItineraryScreen() {
         </ScrollView>
       </View>
 
-      {/* Timeline Content View */}
+      {/* Timeline */}
       <ScrollView
         contentContainerStyle={[styles.timelineContent, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Day Header Title */}
-        <Animated.View entering={FadeInUp.duration(300)} style={styles.dayHeaderTitleStack}>
+        {/* Day Header */}
+        <Animated.View entering={FadeInUp.duration(350)} style={styles.dayHeaderTitleStack}>
           <Text style={[styles.dayHeaderOverline, { color: theme.colors.accentBrand }]}>
-            DAY {currentDayData.dayNumber < 10 ? `0${currentDayData.dayNumber}` : currentDayData.dayNumber} • {currentDayData.dateLabel}
+            DAY {currentDayData.dayNumber < 10 ? `0${currentDayData.dayNumber}` : currentDayData.dayNumber} · {currentDayData.dateLabel}
           </Text>
           <Text
             style={[
@@ -131,10 +145,10 @@ export default function DailyItineraryScreen() {
           {currentDayData.spots?.map((spot, index) => (
             <Animated.View
               key={spot.id}
-              entering={FadeInDown.duration(400).delay(index * 60)}
+              entering={FadeInDown.duration(400).delay(index * 50)}
               style={styles.timelineRow}
             >
-              {/* Left Column: Time & Subtle Node Line */}
+              {/* Time Column */}
               <View style={styles.timelineLeftCol}>
                 <Text
                   style={[
@@ -145,23 +159,21 @@ export default function DailyItineraryScreen() {
                   {spot.time}
                 </Text>
                 <View
-                  style={[
-                    styles.nodeDot,
-                    { backgroundColor: theme.colors.accentBrand },
-                  ]}
+                  style={[styles.nodeDot, { backgroundColor: theme.colors.accentBrand }]}
                 />
                 {index < currentDayData.spots.length - 1 && (
-                  <View style={[styles.verticalLine, { backgroundColor: theme.colors.borderSubtle }]} />
+                  <View
+                    style={[styles.verticalLine, { backgroundColor: theme.colors.borderSubtle }]}
+                  />
                 )}
               </View>
 
-              {/* Right Column: Spot Card Content */}
+              {/* Spot Content */}
               <Pressable
                 onPress={() => handleSpotPress(spot)}
-                style={[
-                  styles.spotCard,
-                  { borderBottomColor: theme.colors.borderSubtle },
-                ]}
+                accessibilityRole="button"
+                accessibilityLabel={`View ${spot.title}`}
+                style={[styles.spotCard, { borderBottomColor: theme.colors.borderSubtle }]}
               >
                 {spot.image && (
                   <Image source={{ uri: spot.image }} style={styles.spotImage} />
@@ -190,29 +202,30 @@ export default function DailyItineraryScreen() {
                         { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
                       ]}
                     >
-                      Duration: {spot.duration}
+                      {spot.duration}
                     </Text>
                   )}
                 </View>
                 <Pressable
                   onPress={() => handleDeleteSpot(spot.id)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  style={{ padding: 4 }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove ${spot.title}`}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  style={styles.deleteBtn}
                 >
-                  <Trash2 size={16} color={theme.colors.textMuted} />
+                  <Trash2 size={15} color={theme.colors.textMuted} />
                 </Pressable>
               </Pressable>
             </Animated.View>
           ))}
         </View>
 
-        {/* Add Spot Button at end of timeline */}
         <Button
-          title={`Add Spot to Day ${selectedDayNumber}`}
+          title="Add Spot"
           icon={Plus}
           onPress={handleAddPlace}
           variant="secondary"
-          style={{ marginTop: 24 }}
+          style={{ marginTop: 28 }}
         />
       </ScrollView>
     </View>
@@ -224,55 +237,60 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerNav: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     paddingBottom: 12,
   },
   headerTitle: {
     fontSize: 18,
   },
   addNavBtn: {
-    padding: 4,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dayStripWrapper: {
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
   },
   dayScrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   dayTab: {
     paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginRight: 16,
+    paddingHorizontal: 14,
+    marginRight: 12,
     borderBottomWidth: 2,
     alignItems: 'center',
+    minWidth: 48,
   },
   dayTabNum: {
-    fontSize: 11,
-    letterSpacing: 1,
+    fontSize: 16,
     marginBottom: 2,
   },
   dayTabDate: {
-    fontSize: 12,
+    fontSize: 11,
   },
   timelineContent: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
   },
   dayHeaderTitleStack: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   dayHeaderOverline: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1.5,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   dayHeaderHeadline: {
     fontSize: 26,
     lineHeight: 32,
+    letterSpacing: -0.3,
   },
   timelineList: {
     position: 'relative',
@@ -283,7 +301,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   timelineLeftCol: {
-    width: 68,
+    width: 64,
     alignItems: 'center',
     position: 'relative',
     paddingTop: 2,
@@ -293,22 +311,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   nodeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
   verticalLine: {
     position: 'absolute',
     top: 30,
     bottom: -24,
-    width: 1.5,
+    width: 1,
   },
   spotCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingBottom: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     paddingLeft: 8,
   },
   spotImage: {
@@ -327,9 +345,13 @@ const styles = StyleSheet.create({
   },
   spotTitle: {
     fontSize: 16,
+    lineHeight: 20,
     marginBottom: 2,
   },
   spotDuration: {
     fontSize: 12,
+  },
+  deleteBtn: {
+    padding: 6,
   },
 });

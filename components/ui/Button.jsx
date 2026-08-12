@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   baseButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 24,
     minHeight: 44,
   },
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   iconMargin: {
     marginRight: 8,

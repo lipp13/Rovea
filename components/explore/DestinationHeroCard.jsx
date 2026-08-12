@@ -70,14 +70,14 @@ const styles = StyleSheet.create({
   topBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
   },
   categoryBadge: {
     backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: 'rgba(255,255,255,0.2)',
   },
   categoryText: {
@@ -128,8 +128,8 @@ const styles = StyleSheet.create({
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
-    borderTopWidth: 1,
+    justifyContent: 'space-between',
+    borderTopWidth: 0.5,
     borderTopColor: 'rgba(255,255,255,0.2)',
     paddingTop: 8,
   },

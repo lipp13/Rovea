@@ -101,13 +101,13 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-around',
-    borderTopWidth: 1,
+    justifyContent: 'space-around',
+    borderTopWidth: 0.5,
     paddingTop: 12,
   },
   statItem: {

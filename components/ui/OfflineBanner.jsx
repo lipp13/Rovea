@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
   bannerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
     paddingVertical: 6,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
   },
   bannerText: {
     fontSize: 11,

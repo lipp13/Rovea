@@ -2,10 +2,64 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Pressable, Switch } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Moon, Sun, Bookmark, Settings, ShieldCheck, Info, ChevronRight, Heart } from 'lucide-react-native';
+import { Moon, Sun, Bookmark, ShieldCheck, Info, ChevronRight, UserCheck, Sparkles } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
+
+function SettingRow({ icon: Icon, label, subtitle, onPress, trailing, theme, isLast }) {
+  const content = (
+    <View
+      style={[
+        styles.settingRow,
+        !isLast && { borderBottomWidth: 0.5, borderBottomColor: theme.colors.borderSubtle },
+      ]}
+    >
+      <View style={styles.settingLeft}>
+        <View style={[styles.settingIconWrap, { backgroundColor: theme.colors.accentSubtle }]}>
+          <Icon size={18} color={theme.colors.accentBrand} />
+        </View>
+        <View style={styles.settingTextStack}>
+          <Text
+            style={[
+              styles.settingLabel,
+              { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium },
+            ]}
+          >
+            {label}
+          </Text>
+          {subtitle && (
+            <Text
+              style={[
+                styles.settingSubtitle,
+                { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+              ]}
+            >
+              {subtitle}
+            </Text>
+          )}
+        </View>
+      </View>
+      <View style={styles.settingRight}>
+        {trailing || <ChevronRight size={16} color={theme.colors.textMuted} />}
+      </View>
+    </View>
+  );
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+  return content;
+}
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -21,37 +75,49 @@ export default function ProfileScreen() {
       style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 },
+        { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 110 },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header Profile Identity */}
-      <Animated.View entering={FadeInUp.duration(400)} style={styles.profileHeader}>
-        <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
-        <View style={styles.headerInfo}>
-          <Text
-            style={[
-              styles.userName,
-              { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-            ]}
-          >
-            {currentUser.name}
-          </Text>
-          <Text
-            style={[
-              styles.userBio,
-              { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-            ]}
-          >
-            {currentUser.bio}
-          </Text>
-        </View>
+      {/* Header Tag */}
+      <Animated.View entering={FadeInUp.duration(400)} style={styles.topBar}>
+        <Sparkles size={13} color={theme.colors.accentBrand} style={{ marginRight: 6 }} />
+        <Text style={[styles.topTagText, { color: theme.colors.accentBrand }]}>
+          TRAVELER PROFILE
+        </Text>
       </Animated.View>
 
-      {/* Stats Counter Strip */}
+      {/* Profile Hero Avatar & Bio */}
+      <Animated.View entering={FadeInUp.duration(450).delay(60)} style={styles.profileHeader}>
+        <View style={[styles.avatarContainer, { borderColor: theme.colors.borderStrong }]}>
+          <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
+          <View style={[styles.verifiedBadge, { backgroundColor: theme.colors.accentBrand }]}>
+            <UserCheck size={12} color="#FFFFFF" />
+          </View>
+        </View>
+
+        <Text
+          style={[
+            styles.userName,
+            { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+          ]}
+        >
+          {currentUser.name}
+        </Text>
+        <Text
+          style={[
+            styles.userBio,
+            { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+          ]}
+        >
+          {currentUser.bio}
+        </Text>
+      </Animated.View>
+
+      {/* Typographic Stat Cards Strip */}
       <Animated.View
-        entering={FadeInUp.duration(400).delay(100)}
-        style={[styles.statsRow, { borderBottomColor: theme.colors.borderSubtle }]}
+        entering={FadeInUp.duration(450).delay(120)}
+        style={[styles.statsRow, { borderColor: theme.colors.borderSubtle, backgroundColor: theme.colors.bgSurface }]}
       >
         <View style={styles.statItem}>
           <Text
@@ -62,9 +128,18 @@ export default function ProfileScreen() {
           >
             {currentUser.tripsCount}
           </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Trips</Text>
+          <Text
+            style={[
+              styles.statLabel,
+              { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
+            ]}
+          >
+            TRIPS
+          </Text>
         </View>
+
         <View style={[styles.verticalDivider, { backgroundColor: theme.colors.borderSubtle }]} />
+
         <View style={styles.statItem}>
           <Text
             style={[
@@ -74,9 +149,18 @@ export default function ProfileScreen() {
           >
             {currentUser.citiesCount}
           </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Cities</Text>
+          <Text
+            style={[
+              styles.statLabel,
+              { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
+            ]}
+          >
+            CITIES
+          </Text>
         </View>
+
         <View style={[styles.verticalDivider, { backgroundColor: theme.colors.borderSubtle }]} />
+
         <View style={styles.statItem}>
           <Text
             style={[
@@ -86,87 +170,69 @@ export default function ProfileScreen() {
           >
             {savedPlaces.length}
           </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Saved</Text>
+          <Text
+            style={[
+              styles.statLabel,
+              { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
+            ]}
+          >
+            SAVED
+          </Text>
         </View>
       </Animated.View>
 
-      {/* Settings & Preferences List */}
-      <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.settingsSection}>
+      {/* Preferences Section */}
+      <Animated.View entering={FadeInDown.duration(450).delay(180)} style={styles.settingsSection}>
         <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-          PREFERENCES & IDENTITY
+          APPEARANCE & SETTINGS
         </Text>
 
-        {/* Dark Mode Toggle Row */}
-        <View style={[styles.settingRow, { borderBottomColor: theme.colors.borderSubtle }]}>
-          <View style={styles.settingLeft}>
-            {themeMode === 'dark' ? (
-              <Moon size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
-            ) : (
-              <Sun size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
-            )}
-            <Text
-              style={[
-                styles.settingLabel,
-                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
-              ]}
-            >
-              Dusk Obsidian Dark Mode
-            </Text>
-          </View>
-          <Switch
-            value={themeMode === 'dark'}
-            onValueChange={toggleTheme}
-            trackColor={{ false: '#D6CEBE', true: '#C25E38' }}
-            thumbColor="#FFFFFF"
+        <View
+          style={[
+            styles.settingsCard,
+            { backgroundColor: theme.colors.bgSurface, borderColor: theme.colors.borderSubtle },
+          ]}
+        >
+          <SettingRow
+            icon={themeMode === 'dark' ? Moon : Sun}
+            label="Appearance Theme"
+            subtitle={themeMode === 'dark' ? 'Dusk Obsidian Mode' : 'Warm Sandstone Mode'}
+            theme={theme}
+            trailing={
+              <Switch
+                value={themeMode === 'dark'}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.colors.borderStrong, true: theme.colors.accentBrand }}
+                thumbColor="#FFFFFF"
+                accessibilityLabel="Toggle dark mode"
+                style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
+              />
+            }
           />
-        </View>
 
-        {/* Saved Places Link */}
-        <View style={[styles.settingRow, { borderBottomColor: theme.colors.borderSubtle }]}>
-          <View style={styles.settingLeft}>
-            <Bookmark size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
-            <Text
-              style={[
-                styles.settingLabel,
-                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
-              ]}
-            >
-              Saved Bookmarks ({savedPlaces.length})
-            </Text>
-          </View>
-          <ChevronRight size={16} color={theme.colors.textSecondary} />
-        </View>
+          <SettingRow
+            icon={Bookmark}
+            label="Saved Bookmarks"
+            subtitle={`${savedPlaces.length} destinations saved`}
+            onPress={() => router.push('/(tabs)/explore')}
+            theme={theme}
+          />
 
-        {/* Privacy & Guidelines */}
-        <View style={[styles.settingRow, { borderBottomColor: theme.colors.borderSubtle }]}>
-          <View style={styles.settingLeft}>
-            <ShieldCheck size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
-            <Text
-              style={[
-                styles.settingLabel,
-                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
-              ]}
-            >
-              Privacy & Data Policy
-            </Text>
-          </View>
-          <ChevronRight size={16} color={theme.colors.textSecondary} />
-        </View>
+          <SettingRow
+            icon={ShieldCheck}
+            label="Privacy & Data Policy"
+            subtitle="Local storage encrypted"
+            onPress={() => {}}
+            theme={theme}
+          />
 
-        {/* About Rovea */}
-        <View style={styles.settingRow}>
-          <View style={styles.settingLeft}>
-            <Info size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
-            <Text
-              style={[
-                styles.settingLabel,
-                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
-              ]}
-            >
-              Rovea Travel Companion v1.0.0
-            </Text>
-          </View>
-          <ChevronRight size={16} color={theme.colors.textSecondary} />
+          <SettingRow
+            icon={Info}
+            label="About Rovea Travel"
+            subtitle="Version 1.0.0 (Phase 5.5 Edition)"
+            theme={theme}
+            isLast
+          />
         </View>
       </Animated.View>
     </ScrollView>
@@ -178,73 +244,134 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
-  profileHeader: {
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  topTagText: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.5,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
+    padding: 3,
+    borderRadius: 50,
+    borderWidth: 1,
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    marginRight: 16,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
-  headerInfo: {
-    flex: 1,
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   userName: {
-    fontSize: 24,
-    lineHeight: 28,
-    marginBottom: 4,
+    fontSize: 28,
+    lineHeight: 34,
+    letterSpacing: -0.4,
+    marginBottom: 6,
   },
   userBio: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: 'center',
+    maxWidth: 290,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-around',
+    justifyContent: 'space-around',
     paddingVertical: 18,
-    borderBottomWidth: 1,
-    marginBottom: 28,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 0.5,
+    marginBottom: 32,
   },
   statItem: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   statNumber: {
-    fontSize: 22,
+    fontSize: 26,
+    lineHeight: 30,
     marginBottom: 2,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 10,
+    letterSpacing: 1.2,
   },
   verticalDivider: {
-    width: 1,
+    width: 0.5,
     height: 32,
   },
   settingsSection: {
     marginBottom: 24,
   },
   sectionOverline: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: '600',
     letterSpacing: 1.2,
-    marginBottom: 12,
+    marginBottom: 14,
+  },
+  settingsCard: {
+    borderRadius: 16,
+    borderWidth: 0.5,
+    overflow: 'hidden',
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    minHeight: 56,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    paddingRight: 16,
+  },
+  settingIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  settingTextStack: {
+    flex: 1,
   },
   settingLabel: {
-    fontSize: 16,
+    fontSize: 15,
+  },
+  settingSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  settingRight: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
 });

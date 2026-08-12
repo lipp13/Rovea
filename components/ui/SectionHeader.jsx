@@ -19,8 +19,8 @@ export const SectionHeader = ({
         {overline && (
           <Text
             style={[
-              theme.typography.overline,
-              { color: theme.colors.accentBrand, marginBottom: 4 },
+              styles.overline,
+              { color: theme.colors.accentBrand },
             ]}
           >
             {overline}
@@ -28,7 +28,7 @@ export const SectionHeader = ({
         )}
         <Text
           style={[
-            theme.typography.headingMd,
+            styles.title,
             { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
           ]}
         >
@@ -38,6 +38,8 @@ export const SectionHeader = ({
       {actionText && onActionPress && (
         <Pressable
           onPress={onActionPress}
+          accessibilityRole="button"
+          accessibilityLabel={actionText}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text
@@ -57,13 +59,24 @@ export const SectionHeader = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    justify: 'space-between',
-    marginBottom: 18,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   textStack: {
     flex: 1,
     paddingRight: 12,
+  },
+  overline: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
+  title: {
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: -0.2,
   },
   actionText: {
     fontSize: 13,

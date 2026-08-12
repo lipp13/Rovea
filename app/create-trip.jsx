@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Check, Calendar, MapPin, Users, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, MapPin, AlertCircle } from 'lucide-react-native';
 import Animated, { FadeInRight, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
@@ -43,7 +43,6 @@ export default function CreateTripScreen() {
       }
       setStep(3);
     } else {
-      // Step 3 Submit
       const created = createTrip({
         title: title || `Wanderlust in ${destination.split(',')[0]}`,
         destination,
@@ -66,10 +65,12 @@ export default function CreateTripScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}>
-      {/* Top Navigation */}
+      {/* Navigation */}
       <View style={[styles.headerNav, { paddingTop: insets.top + 12 }]}>
         <Pressable
           onPress={handleBack}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <ArrowLeft size={22} color={theme.colors.textPrimary} />
@@ -83,7 +84,7 @@ export default function CreateTripScreen() {
         contentContainerStyle={styles.contentScroll}
         showsVerticalScrollIndicator={false}
       >
-        {/* Inline Error Banner if Validation Fails */}
+        {/* Error Banner */}
         {validationError !== '' && (
           <Animated.View
             entering={FadeInDown.duration(200)}
@@ -92,7 +93,7 @@ export default function CreateTripScreen() {
               { backgroundColor: theme.colors.accentSubtle, borderColor: theme.colors.accentBrand },
             ]}
           >
-            <AlertCircle size={16} color={theme.colors.accentBrand} style={{ marginRight: 8 }} />
+            <AlertCircle size={15} color={theme.colors.accentBrand} style={{ marginRight: 8 }} />
             <Text style={[styles.errorText, { color: theme.colors.accentBrand }]}>
               {validationError}
             </Text>
@@ -119,7 +120,7 @@ export default function CreateTripScreen() {
               Where are you wandering?
             </Text>
             <Text style={[styles.subheadline, { color: theme.colors.textSecondary }]}>
-              Enter or select a curated destination to build your itinerary.
+              Enter or select a destination to begin planning.
             </Text>
 
             <View
@@ -128,7 +129,7 @@ export default function CreateTripScreen() {
                 { borderColor: theme.colors.accentBrand, backgroundColor: theme.colors.bgSurface },
               ]}
             >
-              <MapPin size={20} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
+              <MapPin size={18} color={theme.colors.accentBrand} style={{ marginRight: 12 }} />
               <TextInput
                 value={destination}
                 onChangeText={(text) => {
@@ -144,46 +145,47 @@ export default function CreateTripScreen() {
               />
             </View>
 
-            {/* Destination Presets */}
-            <Text style={[styles.presetLabel, { color: theme.colors.textSecondary }]}>
+            {/* Presets */}
+            <Text style={[styles.presetLabel, { color: theme.colors.accentBrand }]}>
               SUGGESTED RETREATS
             </Text>
             <View style={styles.presetList}>
-              {destinations.map((d) => (
-                <Pressable
-                  key={d.id}
-                  onPress={() => {
-                    const full = `${d.title}, ${d.country}`;
-                    setDestination(full);
-                    setTitle(`Trip to ${d.title}`);
-                  }}
-                  style={[
-                    styles.presetChip,
-                    {
-                      backgroundColor:
-                        destination.includes(d.title)
+              {destinations.map((d) => {
+                const isSelected = destination.includes(d.title);
+                return (
+                  <Pressable
+                    key={d.id}
+                    onPress={() => {
+                      const full = `${d.title}, ${d.country}`;
+                      setDestination(full);
+                      setTitle(`Trip to ${d.title}`);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Select ${d.title}, ${d.country}`}
+                    style={[
+                      styles.presetChip,
+                      {
+                        backgroundColor: isSelected
                           ? theme.colors.accentSubtle
                           : theme.colors.bgSurface,
-                      borderColor:
-                        destination.includes(d.title)
+                        borderColor: isSelected
                           ? theme.colors.accentBrand
                           : theme.colors.borderSubtle,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      color: destination.includes(d.title)
-                        ? theme.colors.accentBrand
-                        : theme.colors.textPrimary,
-                      fontFamily: theme.fonts.sansMedium,
-                      fontSize: 13,
-                    }}
+                      },
+                    ]}
                   >
-                    {d.title}, {d.country}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text
+                      style={{
+                        color: isSelected ? theme.colors.accentBrand : theme.colors.textPrimary,
+                        fontFamily: theme.fonts.sansMedium,
+                        fontSize: 14,
+                      }}
+                    >
+                      {d.title}, {d.country}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </Animated.View>
         )}
@@ -225,6 +227,7 @@ export default function CreateTripScreen() {
                       color: theme.colors.textPrimary,
                       borderColor: theme.colors.borderSubtle,
                       backgroundColor: theme.colors.bgSurface,
+                      fontFamily: theme.fonts.sansRegular,
                     },
                   ]}
                 />
@@ -242,6 +245,7 @@ export default function CreateTripScreen() {
                       color: theme.colors.textPrimary,
                       borderColor: theme.colors.borderSubtle,
                       backgroundColor: theme.colors.bgSurface,
+                      fontFamily: theme.fonts.sansRegular,
                     },
                   ]}
                 />
@@ -270,13 +274,13 @@ export default function CreateTripScreen() {
               Title your retreat
             </Text>
             <Text style={[styles.subheadline, { color: theme.colors.textSecondary }]}>
-              Name your journey and specify your travel party style.
+              Name your journey and choose your travel style.
             </Text>
 
             <View
               style={[
                 styles.inputWrapper,
-                { borderColor: theme.colors.borderSubtle, backgroundColor: theme.colors.bgSurface, marginBottom: 20 },
+                { borderColor: theme.colors.borderSubtle, backgroundColor: theme.colors.bgSurface, marginBottom: 24 },
               ]}
             >
               <TextInput
@@ -291,7 +295,7 @@ export default function CreateTripScreen() {
               />
             </View>
 
-            <Text style={[styles.dateLabel, { color: theme.colors.textSecondary, marginBottom: 8 }]}>
+            <Text style={[styles.dateLabel, { color: theme.colors.accentBrand, marginBottom: 10 }]}>
               TRAVEL PARTY
             </Text>
             <View style={styles.travelerOptions}>
@@ -299,6 +303,8 @@ export default function CreateTripScreen() {
                 <Pressable
                   key={opt}
                   onPress={() => setTravelers(opt)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${opt}`}
                   style={[
                     styles.travelerChip,
                     {
@@ -335,7 +341,7 @@ export default function CreateTripScreen() {
         )}
       </ScrollView>
 
-      {/* Bottom Action CTA Dock */}
+      {/* Bottom CTA */}
       <View
         style={[
           styles.bottomDock,
@@ -357,10 +363,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerNav: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   stepIndicator: {
@@ -378,7 +384,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0.5,
     marginBottom: 16,
   },
   errorText: {
@@ -396,6 +402,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 32,
     lineHeight: 38,
+    letterSpacing: -0.4,
     marginBottom: 8,
   },
   subheadline: {
@@ -407,20 +414,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    height: 56,
-    borderRadius: 14,
-    borderWidth: 1.5,
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 0.5,
   },
   inputField: {
     flex: 1,
-    fontSize: 17,
+    fontSize: 16,
   },
   presetLabel: {
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.2,
     fontWeight: '600',
     marginTop: 24,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   presetList: {
     gap: 8,
@@ -429,7 +436,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 0.5,
   },
   dateInputsRow: {
     flexDirection: 'row',
@@ -442,12 +449,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 1,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   dateInput: {
-    height: 50,
-    borderRadius: 12,
-    borderWidth: 1,
+    height: 48,
+    borderRadius: 10,
+    borderWidth: 0.5,
     paddingHorizontal: 14,
     fontSize: 15,
   },
@@ -459,7 +466,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 0.5,
   },
   bottomDock: {
     paddingHorizontal: 24,

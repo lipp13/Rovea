@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Heart, Sun, MapPin, Calendar, Compass, Plus } from 'lucide-react-native';
+import { ArrowLeft, Heart, Sun, Calendar, Compass } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
@@ -17,7 +17,6 @@ export default function DestinationDetailScreen() {
   const openModal = useAppStore((state) => state.openModal);
   const theme = getTheme(themeMode);
 
-  // Dynamic destination lookup by param id
   const destId = params.id || 'dest-kyoto';
   const destination = destinations.find((d) => d.id === destId) || destinations[0];
 
@@ -38,107 +37,89 @@ export default function DestinationDetailScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Large Full-Bleed Destination Image Header */}
+        {/* Full-Bleed Hero */}
         <View style={styles.heroImageContainer}>
           <Image source={{ uri: destination.coverImage }} style={styles.heroImage} />
 
-          {/* Top Bar Header Navigation */}
+          {/* Navigation */}
           <View style={[styles.navHeader, { paddingTop: insets.top + 8 }]}>
             <Pressable
               onPress={() => router.back()}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              style={styles.backButton}
+              style={styles.navBtn}
             >
               <ArrowLeft size={20} color="#FFFFFF" />
             </Pressable>
           </View>
         </View>
 
-        {/* Content Body (Editorial Typography & Whitespace - No Card Containers) */}
+        {/* Content Body */}
         <View style={styles.bodyContent}>
-          {/* Country Tag */}
-          <Text style={[styles.countryTag, { color: theme.colors.accentBrand }]}>
-            {destination.country.toUpperCase()} • {destination.category.toUpperCase()}
-          </Text>
+          <Animated.View entering={FadeInUp.duration(400)}>
+            <Text style={[styles.countryTag, { color: theme.colors.accentBrand }]}>
+              {destination.country.toUpperCase()}
+            </Text>
+            <Text
+              style={[
+                styles.destinationTitle,
+                { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+              ]}
+            >
+              {destination.title}
+            </Text>
+            <Text
+              style={[
+                styles.editorialSub,
+                { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+              ]}
+            >
+              {destination.subtitle}
+            </Text>
+          </Animated.View>
 
-          {/* Title */}
-          <Text
-            style={[
-              styles.destinationTitle,
-              { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-            ]}
-          >
-            {destination.title}
-          </Text>
-
-          {/* Editorial Description */}
-          <Text
-            style={[
-              styles.editorialSub,
-              { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-            ]}
-          >
-            {destination.subtitle}
-          </Text>
-
-          {/* Subtle Hairline Divider */}
+          {/* Divider */}
           <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-          {/* Meta Info Section (Best Time & Weather) */}
-          <View style={styles.metaRow}>
+          {/* Meta Info */}
+          <Animated.View entering={FadeInUp.duration(400).delay(80)} style={styles.metaRow}>
             <View style={styles.metaItem}>
               <Calendar size={16} color={theme.colors.accentBrand} style={{ marginBottom: 6 }} />
               <Text
-                style={[
-                  styles.metaLabel,
-                  { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                ]}
+                style={[styles.metaLabel, { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular }]}
               >
-                Best Time to Visit
+                Best Time
               </Text>
               <Text
-                style={[
-                  styles.metaValue,
-                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold },
-                ]}
+                style={[styles.metaValue, { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium }]}
               >
                 {destination.bestTime}
               </Text>
             </View>
-
             <View style={[styles.verticalDivider, { backgroundColor: theme.colors.borderSubtle }]} />
-
             <View style={styles.metaItem}>
               <Sun size={16} color={theme.colors.accentBrand} style={{ marginBottom: 6 }} />
               <Text
-                style={[
-                  styles.metaLabel,
-                  { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                ]}
+                style={[styles.metaLabel, { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular }]}
               >
-                Current Weather
+                Weather
               </Text>
               <Text
-                style={[
-                  styles.metaValue,
-                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold },
-                ]}
+                style={[styles.metaValue, { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium }]}
               >
-                {destination.temperature} • {destination.weatherSummary || 'Clear'}
+                {destination.temperature} · {destination.weatherSummary || 'Clear'}
               </Text>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Subtle Hairline Divider */}
+          {/* Divider */}
           <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-          {/* Curated Places Section (Editorial List) */}
-          <View style={styles.sectionHeader}>
+          {/* Places to Discover */}
+          <Animated.View entering={FadeInDown.duration(400).delay(160)} style={styles.sectionHeader}>
             <Text
-              style={[
-                styles.sectionOverline,
-                { color: theme.colors.accentBrand, fontFamily: theme.fonts.sansSemiBold },
-              ]}
+              style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}
             >
               PLACES TO DISCOVER
             </Text>
@@ -148,51 +129,54 @@ export default function DestinationDetailScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              Curated Highlights in {destination.title}
+              Curated in {destination.title}
             </Text>
-          </View>
+          </Animated.View>
 
-          {destination.curatedSpots?.map((spot) => (
-            <Pressable
+          {destination.curatedSpots?.map((spot, index) => (
+            <Animated.View
               key={spot.id}
-              onPress={() => handlePlacePress(spot)}
-              style={[
-                styles.spotRow,
-                { borderBottomColor: theme.colors.borderSubtle },
-              ]}
+              entering={FadeInDown.duration(350).delay(200 + index * 50)}
             >
-              <Image source={{ uri: spot.image }} style={styles.spotThumbnail} />
-              <View style={styles.spotInfo}>
-                <Text
-                  style={[
-                    styles.spotTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                  ]}
-                >
-                  {spot.title}
-                </Text>
-                <Text
-                  style={[
-                    styles.spotCategory,
-                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                  ]}
-                >
-                  {spot.category} • Rating {spot.rating}
-                </Text>
-              </View>
-            </Pressable>
+              <Pressable
+                onPress={() => handlePlacePress(spot)}
+                accessibilityRole="button"
+                accessibilityLabel={`View ${spot.title}`}
+                style={[styles.spotRow, { borderBottomColor: theme.colors.borderSubtle }]}
+              >
+                <Image source={{ uri: spot.image }} style={styles.spotThumbnail} />
+                <View style={styles.spotInfo}>
+                  <Text
+                    style={[
+                      styles.spotTitle,
+                      { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+                    ]}
+                  >
+                    {spot.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.spotCategory,
+                      { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+                    ]}
+                  >
+                    {spot.category} · {spot.rating} ★
+                  </Text>
+                </View>
+              </Pressable>
+            </Animated.View>
           ))}
         </View>
       </ScrollView>
 
-      {/* Floating Bottom CTA Dock */}
+      {/* Floating CTA */}
       <View
         style={[
           styles.ctaDock,
           {
             backgroundColor: theme.colors.bgSurface,
             borderTopColor: theme.colors.borderSubtle,
-            paddingBottom: Math.max(insets.bottom, 14),
+            paddingBottom: Math.max(insets.bottom, 16),
           },
         ]}
       >
@@ -211,7 +195,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroImageContainer: {
-    height: 380,
+    height: 400,
     width: '100%',
     position: 'relative',
   },
@@ -225,82 +209,82 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
   },
-  backButton: {
+  navBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   bodyContent: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
   },
   countryTag: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1.5,
     marginBottom: 6,
   },
   destinationTitle: {
     fontSize: 36,
     lineHeight: 42,
+    letterSpacing: -0.4,
     marginBottom: 10,
   },
   editorialSub: {
     fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 16,
+    lineHeight: 23,
   },
   divider: {
-    height: 1,
+    height: 0.5,
     width: '100%',
-    marginVertical: 18,
+    marginVertical: 24,
   },
   metaRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justify: 'space-around',
+    alignItems: 'flex-start',
   },
   metaItem: {
     flex: 1,
-    alignItems: 'flex-start',
   },
   verticalDivider: {
-    width: 1,
-    height: 40,
-    marginHorizontal: 16,
+    width: 0.5,
+    height: 48,
+    marginHorizontal: 20,
   },
   metaLabel: {
-    fontSize: 11,
+    fontSize: 12,
     marginBottom: 4,
   },
   metaValue: {
-    fontSize: 13,
+    fontSize: 14,
   },
   sectionHeader: {
     marginBottom: 16,
   },
   sectionOverline: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: '600',
     letterSpacing: 1.2,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   sectionTitle: {
     fontSize: 22,
+    lineHeight: 28,
   },
   spotRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
+    paddingVertical: 16,
+    borderBottomWidth: 0.5,
   },
   spotThumbnail: {
-    width: 64,
-    height: 64,
+    width: 68,
+    height: 68,
     borderRadius: 10,
     marginRight: 14,
   },
@@ -309,18 +293,19 @@ const styles = StyleSheet.create({
   },
   spotTitle: {
     fontSize: 16,
+    lineHeight: 20,
     marginBottom: 4,
   },
   spotCategory: {
-    fontSize: 12,
+    fontSize: 13,
   },
   ctaDock: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    borderTopWidth: 1,
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    borderTopWidth: 0.5,
   },
 });

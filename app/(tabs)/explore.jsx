@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Search, MapPin, ArrowRight } from 'lucide-react-native';
+import { Search, ArrowRight } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
@@ -20,7 +20,7 @@ export default function ExploreScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const featuredDestination = destinations[0]; // Kyoto
+  const featuredDestination = destinations[0];
   const otherDestinations = destinations.slice(1);
 
   const filteredDestinations = destinations.filter((item) => {
@@ -45,22 +45,19 @@ export default function ExploreScreen() {
       style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 },
+        { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 },
       ]}
       showsVerticalScrollIndicator={false}
     >
       {/* Editorial Header */}
-      <Animated.View entering={FadeInUp.duration(400)} style={styles.headerStack}>
-        <Text style={[styles.overline, { color: theme.colors.accentBrand }]}>
-          EDITORIAL JOURNAL
-        </Text>
+      <Animated.View entering={FadeInUp.duration(450)} style={styles.headerStack}>
         <Text
           style={[
             styles.title,
             { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
           ]}
         >
-          Explore Destinations
+          Explore
         </Text>
         <Text
           style={[
@@ -68,12 +65,12 @@ export default function ExploreScreen() {
             { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
           ]}
         >
-          Curated guides for slow wanderlust and authentic local culture.
+          Find somewhere worth going.
         </Text>
       </Animated.View>
 
-      {/* Minimal Search Bar */}
-      <Animated.View entering={FadeInUp.duration(400).delay(100)} style={styles.searchRow}>
+      {/* Search Bar */}
+      <Animated.View entering={FadeInUp.duration(400).delay(80)} style={styles.searchRow}>
         <View
           style={[
             styles.searchInputContainer,
@@ -82,25 +79,25 @@ export default function ExploreScreen() {
               borderColor: theme.colors.borderSubtle,
               borderRadius: theme.radii.pill,
             },
-            theme.shadows.subtle,
           ]}
         >
-          <Search size={18} color={theme.colors.textSecondary} style={{ marginRight: 10 }} />
+          <Search size={18} color={theme.colors.textMuted} style={{ marginRight: 10 }} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search cities, countries, categories..."
+            placeholder="Search cities, countries..."
             placeholderTextColor={theme.colors.textMuted}
             style={[
               styles.searchInput,
               { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansRegular },
             ]}
+            returnKeyType="search"
           />
         </View>
       </Animated.View>
 
-      {/* Minimal Category Chips */}
-      <Animated.View entering={FadeInUp.duration(400).delay(150)} style={styles.categoryRow}>
+      {/* Category Chips */}
+      <Animated.View entering={FadeInUp.duration(400).delay(120)} style={styles.categoryRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {exploreCategories.map((category) => (
             <Chip
@@ -113,17 +110,23 @@ export default function ExploreScreen() {
         </ScrollView>
       </Animated.View>
 
-      {/* FEATURED DESTINATION (Magazine Cover Style) */}
+      {/* Featured Destination — magazine cover */}
       {!searchQuery && selectedCategory === 'All' && featuredDestination && (
-        <Animated.View entering={FadeInUp.duration(400).delay(200)} style={styles.featuredSection}>
-          <Pressable onPress={() => handleDestinationPress(featuredDestination)}>
+        <Animated.View entering={FadeInUp.duration(500).delay(180)} style={styles.featuredSection}>
+          <Pressable
+            onPress={() => handleDestinationPress(featuredDestination)}
+            accessibilityRole="button"
+            accessibilityLabel={`View ${featuredDestination.title}`}
+          >
             <View style={styles.featuredImageContainer}>
               <Image
                 source={{ uri: featuredDestination.coverImage }}
                 style={styles.featuredImage}
               />
-              <View style={styles.featuredTag}>
-                <Text style={styles.featuredTagText}>FEATURED STORY</Text>
+              <View style={styles.featuredScrim}>
+                <View style={styles.featuredTag}>
+                  <Text style={styles.featuredTagText}>FEATURED</Text>
+                </View>
               </View>
             </View>
 
@@ -152,47 +155,53 @@ export default function ExploreScreen() {
         </Animated.View>
       )}
 
-      {/* Hairline Divider */}
+      {/* Divider */}
       <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-      {/* CURATED DESTINATIONS (Editorial Photography List - No SaaS Cards) */}
-      <Animated.View entering={FadeInDown.duration(400).delay(300)}>
+      {/* All Destinations */}
+      <Animated.View entering={FadeInDown.duration(400).delay(260)}>
         <SectionHeader
           overline="COLLECTION"
-          title={`All Destinations (${filteredDestinations.length})`}
+          title={`All Destinations`}
         />
 
-        {filteredDestinations.map((dest) => (
-          <Pressable
+        {filteredDestinations.map((dest, index) => (
+          <Animated.View
             key={dest.id}
-            onPress={() => handleDestinationPress(dest)}
-            style={[styles.editorialDestRow, { borderBottomColor: theme.colors.borderSubtle }]}
+            entering={FadeInDown.duration(350).delay(280 + index * 40)}
           >
-            <Image source={{ uri: dest.coverImage }} style={styles.destThumbnail} />
-            <View style={styles.destInfoStack}>
-              <Text style={[styles.destCountry, { color: theme.colors.accentBrand }]}>
-                {dest.country.toUpperCase()}
-              </Text>
-              <Text
-                style={[
-                  styles.destTitle,
-                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                ]}
-              >
-                {dest.title}
-              </Text>
-              <Text
-                numberOfLines={2}
-                style={[
-                  styles.destSub,
-                  { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
-                ]}
-              >
-                {dest.subtitle}
-              </Text>
-            </View>
-            <ArrowRight size={18} color={theme.colors.textSecondary} />
-          </Pressable>
+            <Pressable
+              onPress={() => handleDestinationPress(dest)}
+              accessibilityRole="button"
+              accessibilityLabel={`View ${dest.title} in ${dest.country}`}
+              style={[styles.editorialDestRow, { borderBottomColor: theme.colors.borderSubtle }]}
+            >
+              <Image source={{ uri: dest.coverImage }} style={styles.destThumbnail} />
+              <View style={styles.destInfoStack}>
+                <Text style={[styles.destCountry, { color: theme.colors.accentBrand }]}>
+                  {dest.country.toUpperCase()}
+                </Text>
+                <Text
+                  style={[
+                    styles.destTitle,
+                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+                  ]}
+                >
+                  {dest.title}
+                </Text>
+                <Text
+                  numberOfLines={2}
+                  style={[
+                    styles.destSub,
+                    { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+                  ]}
+                >
+                  {dest.subtitle}
+                </Text>
+              </View>
+              <ArrowRight size={16} color={theme.colors.textMuted} />
+            </Pressable>
+          </Animated.View>
         ))}
       </Animated.View>
     </ScrollView>
@@ -204,23 +213,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   headerStack: {
-    marginBottom: 20,
-  },
-  overline: {
-    fontSize: 10,
-    letterSpacing: 1.5,
-    marginBottom: 4,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.4,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 15,
+    lineHeight: 22,
   },
   searchRow: {
     marginBottom: 16,
@@ -229,21 +235,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    height: 48,
-    borderWidth: 1,
+    height: 46,
+    borderWidth: 0.5,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
+    height: '100%',
   },
   categoryRow: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   featuredSection: {
-    marginBottom: 24,
+    marginBottom: 8,
   },
   featuredImageContainer: {
-    height: 320,
+    height: 340,
     width: '100%',
     borderRadius: 14,
     overflow: 'hidden',
@@ -254,53 +261,59 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  featuredTag: {
+  featuredScrim: {
     position: 'absolute',
-    top: 14,
-    left: 14,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    top: 0,
+    left: 0,
+    right: 0,
+    padding: 14,
+  },
+  featuredTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(0,0,0,0.45)',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   featuredTagText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1,
   },
   featuredTextStack: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
   featuredCountry: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1.2,
     marginBottom: 4,
   },
   featuredTitle: {
     fontSize: 28,
     lineHeight: 34,
+    letterSpacing: -0.3,
     marginBottom: 6,
   },
   featuredSub: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   divider: {
-    height: 1,
+    height: 0.5,
     width: '100%',
-    marginVertical: 24,
+    marginVertical: 28,
   },
   editorialDestRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 18,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
   },
   destThumbnail: {
-    width: 80,
-    height: 80,
+    width: 72,
+    height: 72,
     borderRadius: 10,
     marginRight: 16,
   },
@@ -310,13 +323,13 @@ const styles = StyleSheet.create({
   },
   destCountry: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1,
-    marginBottom: 2,
+    marginBottom: 3,
   },
   destTitle: {
-    fontSize: 20,
-    lineHeight: 24,
+    fontSize: 18,
+    lineHeight: 22,
     marginBottom: 4,
   },
   destSub: {

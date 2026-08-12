@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   titleStack: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    justify: 'space-between',
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 24,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   divider: {
-    height: 1,
+    height: 0.5,
     width: '100%',
     marginVertical: 14,
   },
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     marginTop: 8,
     marginBottom: 12,
     gap: 12,

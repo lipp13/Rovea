@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   card: {
     width: 170,
     marginRight: 14,
-    borderWidth: 1,
+    borderWidth: 0.5,
     overflow: 'hidden',
   },
   imageContainer: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   details: {
     padding: 10,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   cityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     marginBottom: 2,
   },
   cityText: {

@@ -4,12 +4,47 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { House, Compass, Luggage, User } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function TabButton({ isFocused, icon: Icon, label, onPress, theme }) {
+  const opacity = useSharedValue(isFocused ? 1 : 0.5);
+
+  React.useEffect(() => {
+    opacity.value = withTiming(isFocused ? 1 : 0.5, { duration: 180 });
+  }, [isFocused]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: isFocused }}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      style={[styles.tabItem, animatedStyle]}
+    >
+      <Icon
+        size={21}
+        color={isFocused ? theme.colors.textPrimary : theme.colors.textMuted}
+        strokeWidth={isFocused ? 2 : 1.5}
+      />
+      {isFocused && (
+        <View style={[styles.activeDot, { backgroundColor: theme.colors.accentBrand }]} />
+      )}
+    </AnimatedPressable>
+  );
+}
+
 function CustomTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
-  const themeMode = useAppStore((state) => state.themeMode);
+  const themeMode = useAppStore((s) => s.themeMode);
   const theme = getTheme(themeMode);
 
   return (
@@ -35,65 +70,23 @@ function CustomTabBar({ state, descriptors, navigation }) {
             target: route.key,
             canPreventDefault: true,
           });
-
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(route.name);
           }
         };
 
-        const renderIcon = () => {
-          const color = isFocused ? theme.colors.accentBrand : theme.colors.textSecondary;
-          const strokeWidth = isFocused ? 2.0 : 1.5;
-
-          switch (route.name) {
-            case 'index':
-              return <House size={20} color={color} strokeWidth={strokeWidth} />;
-            case 'explore':
-              return <Compass size={20} color={color} strokeWidth={strokeWidth} />;
-            case 'trips':
-              return <Luggage size={20} color={color} strokeWidth={strokeWidth} />;
-            case 'profile':
-              return <User size={20} color={color} strokeWidth={strokeWidth} />;
-            default:
-              return <House size={20} color={color} strokeWidth={strokeWidth} />;
-          }
-        };
-
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
+        const icons = { index: House, explore: Compass, trips: Luggage, profile: User };
+        const labels = { index: 'Home', explore: 'Explore', trips: 'Trips', profile: 'Profile' };
 
         return (
-          <Pressable
+          <TabButton
             key={route.key}
+            isFocused={isFocused}
+            icon={icons[route.name] || House}
+            label={labels[route.name] || route.name}
             onPress={onPress}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={styles.tabItem}
-          >
-            {renderIcon()}
-            <Text
-              style={[
-                styles.tabLabel,
-                {
-                  color: isFocused ? theme.colors.accentBrand : theme.colors.textSecondary,
-                  fontFamily: isFocused ? theme.fonts.sansSemiBold : theme.fonts.sansRegular,
-                },
-              ]}
-            >
-              {label}
-            </Text>
-            {isFocused && (
-              <View
-                style={[
-                  styles.activeDot,
-                  { backgroundColor: theme.colors.accentBrand },
-                ]}
-              />
-            )}
-          </Pressable>
+            theme={theme}
+          />
         );
       })}
     </View>
@@ -104,9 +97,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="explore" options={{ title: 'Explore' }} />
@@ -119,33 +110,29 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   dockContainer: {
     position: 'absolute',
-    left: 20,
-    right: 20,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1,
+    left: 24,
+    right: 24,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 0.5,
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-around',
-    paddingHorizontal: 8,
+    justifyContent: 'space-around',
+    paddingHorizontal: 12,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
-    justify: 'center',
-    paddingVertical: 4,
+    justifyContent: 'center',
+    paddingVertical: 8,
     position: 'relative',
-  },
-  tabLabel: {
-    fontSize: 10,
-    marginTop: 2,
-    letterSpacing: 0.2,
+    minHeight: 44,
   },
   activeDot: {
     position: 'absolute',
-    bottom: 1,
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
+    bottom: 4,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
 });

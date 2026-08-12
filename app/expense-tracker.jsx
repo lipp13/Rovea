@@ -54,22 +54,32 @@ export default function ExpenseTrackerScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}>
-      {/* Top Header Bar */}
+      {/* Header */}
       <View style={[styles.headerNav, { paddingTop: insets.top + 12 }]}>
         <Pressable
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <ArrowLeft size={22} color={theme.colors.textPrimary} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold }]}>
-          Trip Expenses
+        <Text
+          style={[
+            styles.headerTitle,
+            { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+          ]}
+        >
+          Expenses
         </Text>
         <Pressable
           onPress={() => setShowAddForm(!showAddForm)}
+          accessibilityRole="button"
+          accessibilityLabel="Add expense"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={[styles.addBtn, { backgroundColor: theme.colors.accentSubtle }]}
         >
-          <Plus size={22} color={theme.colors.accentBrand} />
+          <Plus size={18} color={theme.colors.accentBrand} />
         </Pressable>
       </View>
 
@@ -77,12 +87,8 @@ export default function ExpenseTrackerScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Editorial Top Spend / Budget Header (Typography & Whitespace) */}
+        {/* Budget Summary */}
         <Animated.View entering={FadeInUp.duration(400)} style={styles.topBudgetSection}>
-          <Text style={[styles.overlineTag, { color: theme.colors.accentBrand }]}>
-            TRIP BUDGET TRACKER
-          </Text>
-
           <View style={styles.amountDisplayRow}>
             <View>
               <Text
@@ -97,37 +103,36 @@ export default function ExpenseTrackerScreen() {
                 total spent
               </Text>
             </View>
-
             <View style={styles.budgetRightColumn}>
               <Text
                 style={[
                   styles.budgetAmount,
-                  { color: theme.colors.textSecondary, fontFamily: theme.fonts.serifMedium },
+                  { color: theme.colors.textSecondary, fontFamily: theme.fonts.serifSemiBold },
                 ]}
               >
                 {expenseTracker.budgetFormatted}
               </Text>
               <Text style={[styles.amountSublabel, { color: theme.colors.textMuted }]}>
-                budget limit ({expenseTracker.currency}{remainingBudget.toLocaleString()} left)
+                {expenseTracker.currency}{remainingBudget.toLocaleString()} remaining
               </Text>
             </View>
           </View>
 
-          {/* Subtle Hairline Progress Bar */}
+          {/* Progress */}
           <View style={[styles.progressTrack, { backgroundColor: theme.colors.bgSubtle }]}>
             <View
               style={[
                 styles.progressFill,
                 {
                   width: `${progressRatio * 100}%`,
-                  backgroundColor: theme.colors.accentBrand,
+                  backgroundColor: progressRatio > 0.9 ? theme.colors.destructive : theme.colors.accentBrand,
                 },
               ]}
             />
           </View>
         </Animated.View>
 
-        {/* Inline Add Expense Form if Toggled */}
+        {/* Add Form */}
         {showAddForm && (
           <Animated.View
             entering={FadeInUp.duration(300)}
@@ -142,13 +147,13 @@ export default function ExpenseTrackerScreen() {
                 { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
               ]}
             >
-              Log New Expense
+              Log Expense
             </Text>
 
             {formError !== '' && (
               <View style={styles.errorBox}>
-                <AlertCircle size={14} color={theme.colors.accentBrand} style={{ marginRight: 6 }} />
-                <Text style={[styles.errorText, { color: theme.colors.accentBrand }]}>
+                <AlertCircle size={13} color={theme.colors.destructive} style={{ marginRight: 6 }} />
+                <Text style={[styles.errorText, { color: theme.colors.destructive }]}>
                   {formError}
                 </Text>
               </View>
@@ -157,7 +162,7 @@ export default function ExpenseTrackerScreen() {
             <TextInput
               value={expenseTitle}
               onChangeText={setExpenseTitle}
-              placeholder="Expense title (e.g. Ramen Lunch)"
+              placeholder="Title (e.g. Ramen Lunch)"
               placeholderTextColor={theme.colors.textMuted}
               style={[
                 styles.formInput,
@@ -165,6 +170,7 @@ export default function ExpenseTrackerScreen() {
                   color: theme.colors.textPrimary,
                   borderColor: theme.colors.borderSubtle,
                   backgroundColor: theme.colors.bgSubtle,
+                  fontFamily: theme.fonts.sansRegular,
                 },
               ]}
             />
@@ -181,98 +187,98 @@ export default function ExpenseTrackerScreen() {
                   color: theme.colors.textPrimary,
                   borderColor: theme.colors.borderSubtle,
                   backgroundColor: theme.colors.bgSubtle,
+                  fontFamily: theme.fonts.sansRegular,
                 },
               ]}
             />
 
-            <Button
-              title="Save Expense"
-              onPress={handleAddExpenseSubmit}
-              variant="primary"
-              style={{ marginTop: 8 }}
-            />
+            <Button title="Save Expense" onPress={handleAddExpenseSubmit} variant="primary" style={{ marginTop: 4 }} />
           </Animated.View>
         )}
 
-        {/* Subtle Hairline Divider */}
+        {/* Divider */}
         <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-        {/* Category Breakdown Section (Typography & Spacing) */}
-        <Animated.View entering={FadeInDown.duration(400).delay(150)}>
+        {/* Categories */}
+        <Animated.View entering={FadeInDown.duration(400).delay(100)}>
           <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-            DYNAMIC CATEGORY BREAKDOWN
+            BY CATEGORY
           </Text>
 
-          <View style={styles.categoryList}>
-            {expenseTracker.categories.map((cat, idx) => (
-              <View
-                key={idx}
+          {expenseTracker.categories.map((cat, idx) => (
+            <View
+              key={idx}
+              style={[
+                styles.categoryRow,
+                idx < expenseTracker.categories.length - 1 && {
+                  borderBottomWidth: 0.5,
+                  borderBottomColor: theme.colors.borderSubtle,
+                },
+              ]}
+            >
+              <Text
                 style={[
-                  styles.categoryRow,
-                  { borderBottomColor: theme.colors.borderSubtle },
+                  styles.categoryName,
+                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium },
                 ]}
               >
+                {cat.name}
+              </Text>
+              <View style={styles.categoryRight}>
                 <Text
                   style={[
-                    styles.categoryName,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
+                    styles.categoryAmount,
+                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold },
                   ]}
                 >
-                  {cat.name}
+                  {cat.formatted}
                 </Text>
-                <View style={styles.categoryRight}>
-                  <Text
-                    style={[
-                      styles.categoryAmount,
-                      { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold },
-                    ]}
-                  >
-                    {cat.formatted}
-                  </Text>
-                  <Text style={[styles.categoryPercent, { color: theme.colors.textSecondary }]}>
-                    ({cat.percentage})
-                  </Text>
-                </View>
+                <Text style={[styles.categoryPercent, { color: theme.colors.textMuted }]}>
+                  {cat.percentage}
+                </Text>
               </View>
-            ))}
-          </View>
+            </View>
+          ))}
         </Animated.View>
 
-        {/* Subtle Hairline Divider */}
+        {/* Divider */}
         <View style={[styles.divider, { backgroundColor: theme.colors.borderSubtle }]} />
 
-        {/* Recent Transactions List */}
-        <Animated.View entering={FadeInDown.duration(400).delay(300)}>
+        {/* Transactions */}
+        <Animated.View entering={FadeInDown.duration(400).delay(200)}>
           <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-            TRANSACTION LOGS ({expenseTracker.transactions.length})
+            TRANSACTIONS ({expenseTracker.transactions.length})
           </Text>
 
-          {expenseTracker.transactions.map((tx) => (
+          {expenseTracker.transactions.map((tx, idx) => (
             <View
               key={tx.id}
               style={[
                 styles.txRow,
-                { borderBottomColor: theme.colors.borderSubtle },
+                idx < expenseTracker.transactions.length - 1 && {
+                  borderBottomWidth: 0.5,
+                  borderBottomColor: theme.colors.borderSubtle,
+                },
               ]}
             >
               <View style={{ flex: 1 }}>
                 <Text
                   style={[
                     styles.txTitle,
-                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifMedium },
+                    { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansMedium },
                   ]}
                 >
                   {tx.title}
                 </Text>
                 <Text style={[styles.txMeta, { color: theme.colors.textSecondary }]}>
-                  {tx.category} • {tx.date}
+                  {tx.category} · {tx.date}
                 </Text>
               </View>
 
               <Text
                 style={[
                   styles.txAmount,
-                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold, marginRight: 12 },
+                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.sansSemiBold, marginRight: 14 },
                 ]}
               >
                 {tx.amount}
@@ -280,9 +286,11 @@ export default function ExpenseTrackerScreen() {
 
               <Pressable
                 onPress={() => deleteExpense(tx.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`Delete ${tx.title}`}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Trash2 size={16} color={theme.colors.textMuted} />
+                <Trash2 size={15} color={theme.colors.textMuted} />
               </Pressable>
             </View>
           ))}
@@ -297,40 +305,42 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerNav: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     paddingBottom: 12,
   },
   headerTitle: {
     fontSize: 18,
   },
+  addBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: 24,
+    paddingTop: 20,
   },
   topBudgetSection: {
-    marginBottom: 8,
-  },
-  overlineTag: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.5,
     marginBottom: 8,
   },
   amountDisplayRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    justify: 'space-between',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   spentAmount: {
-    fontSize: 38,
-    lineHeight: 44,
+    fontSize: 36,
+    lineHeight: 42,
+    letterSpacing: -0.4,
   },
   budgetAmount: {
-    fontSize: 22,
+    fontSize: 20,
   },
   amountSublabel: {
     fontSize: 12,
@@ -340,24 +350,24 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   progressTrack: {
-    height: 4,
+    height: 3,
     width: '100%',
-    borderRadius: 2,
+    borderRadius: 1.5,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 2,
+    borderRadius: 1.5,
   },
   addFormCard: {
     padding: 16,
     borderRadius: 14,
-    borderWidth: 1,
-    marginTop: 16,
+    borderWidth: 0.5,
+    marginTop: 20,
   },
   formTitle: {
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   errorBox: {
     flexDirection: 'row',
@@ -368,35 +378,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   formInput: {
-    height: 44,
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 12,
+    height: 46,
+    borderRadius: 10,
+    borderWidth: 0.5,
+    paddingHorizontal: 14,
     marginBottom: 10,
     fontSize: 14,
   },
   divider: {
-    height: 1,
+    height: 0.5,
     width: '100%',
-    marginVertical: 20,
+    marginVertical: 24,
   },
   sectionOverline: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: '600',
     letterSpacing: 1.2,
-    marginBottom: 12,
-  },
-  categoryList: {
-    gap: 4,
+    marginBottom: 14,
   },
   categoryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 14,
   },
   categoryName: {
-    fontSize: 16,
+    fontSize: 15,
   },
   categoryRight: {
     flexDirection: 'row',
@@ -412,9 +419,8 @@ const styles = StyleSheet.create({
   txRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justify: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 14,
   },
   txTitle: {
     fontSize: 15,

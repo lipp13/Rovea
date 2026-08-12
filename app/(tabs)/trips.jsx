@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Plus, ArrowRight, MapPin, Calendar, Clock } from 'lucide-react-native';
+import { Plus, ArrowRight } from 'lucide-react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
@@ -18,7 +18,7 @@ export default function TripsScreen() {
   const trips = useAppStore((state) => state.trips);
   const theme = getTheme(themeMode);
 
-  const [activeTab, setActiveTab] = useState('Active'); // 'Active' | 'Past'
+  const [activeTab, setActiveTab] = useState('Active');
 
   const upcomingTrips = trips.filter((t) => t.id !== activeTrip?.id && t.status !== 'Completed');
   const pastTrips = trips.filter((t) => t.status === 'Completed');
@@ -39,43 +39,42 @@ export default function TripsScreen() {
       style={[styles.container, { backgroundColor: theme.colors.bgPrimary }]}
       contentContainerStyle={[
         styles.scrollContent,
-        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 },
+        { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header Bar */}
-      <Animated.View entering={FadeInUp.duration(400)} style={styles.headerRow}>
-        <View>
-          <Text style={[styles.overline, { color: theme.colors.accentBrand }]}>
-            YOUR JOURNEYS
-          </Text>
+      {/* Header */}
+      <Animated.View entering={FadeInUp.duration(450)} style={styles.headerRow}>
+        <View style={{ flex: 1 }}>
           <Text
             style={[
               styles.title,
               { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
             ]}
           >
-            Trips & Itineraries
+            My Trips
           </Text>
         </View>
         <Pressable
           onPress={handleCreateTrip}
+          accessibilityRole="button"
+          accessibilityLabel="Create new trip"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={[styles.addNavBtn, { backgroundColor: theme.colors.accentSubtle }]}
+          style={[styles.addBtn, { backgroundColor: theme.colors.accentSubtle }]}
         >
           <Plus size={20} color={theme.colors.accentBrand} />
         </Pressable>
       </Animated.View>
 
       {/* Filter Tabs */}
-      <Animated.View entering={FadeInUp.duration(400).delay(100)} style={styles.tabRow}>
+      <Animated.View entering={FadeInUp.duration(400).delay(80)} style={styles.tabRow}>
         <Chip
-          label="Active & Upcoming"
+          label="Active"
           active={activeTab === 'Active'}
           onPress={() => setActiveTab('Active')}
         />
         <Chip
-          label="Past Journeys"
+          label="Past"
           active={activeTab === 'Past'}
           onPress={() => setActiveTab('Past')}
         />
@@ -83,84 +82,109 @@ export default function TripsScreen() {
 
       {activeTab === 'Active' && (
         <>
-          {/* Active Trip Hero Banner */}
+          {/* Active Trip Hero */}
           {activeTrip && (
-            <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.activeSection}>
+            <Animated.View entering={FadeInDown.duration(450).delay(160)} style={styles.activeSection}>
               <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-                CURRENT TRIP IN PROGRESS
+                IN PROGRESS
               </Text>
 
-              <Pressable onPress={() => handleTripOverview(activeTrip.id)} style={styles.heroCard}>
+              <Pressable
+                onPress={() => handleTripOverview(activeTrip.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`View ${activeTrip.title}`}
+                style={styles.heroCard}
+              >
                 <Image source={{ uri: activeTrip.coverImage }} style={styles.heroImage} />
                 <View style={styles.heroScrim}>
                   <View style={styles.dayTag}>
                     <Text style={styles.dayTagText}>
-                      Day {activeTrip.currentDay || 1} of {activeTrip.totalDays || 7}
+                      Day {activeTrip.currentDay || 1} / {activeTrip.totalDays || 7}
                     </Text>
                   </View>
-                  <Text style={styles.heroDestination}>{activeTrip.destination.toUpperCase()}</Text>
+                  <Text style={styles.heroDestination}>
+                    {activeTrip.destination.toUpperCase()}
+                  </Text>
                   <Text style={styles.heroTitle}>{activeTrip.title}</Text>
                   <Text style={styles.heroDates}>
-                    {activeTrip.startDate} — {activeTrip.endDate} ({activeTrip.daysRemaining || 7} days remaining)
+                    {activeTrip.startDate} — {activeTrip.endDate}
                   </Text>
                 </View>
               </Pressable>
             </Animated.View>
           )}
 
-          {/* Upcoming Trips List */}
-          <Animated.View entering={FadeInDown.duration(400).delay(300)} style={styles.upcomingSection}>
-            <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-              UPCOMING RETREATS ({upcomingTrips.length})
-            </Text>
-
-            {upcomingTrips.map((trip) => (
-              <Pressable
-                key={trip.id}
-                onPress={() => handleTripOverview(trip.id)}
-                style={[
-                  styles.tripRow,
-                  { borderBottomColor: theme.colors.borderSubtle },
-                ]}
-              >
-                <Image source={{ uri: trip.coverImage }} style={styles.rowThumbnail} />
-                <View style={styles.rowInfo}>
-                  <Text style={[styles.rowDest, { color: theme.colors.accentBrand }]}>
-                    {trip.destination.toUpperCase()}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.rowTitle,
-                      { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
-                    ]}
-                  >
-                    {trip.title}
-                  </Text>
-                  <Text style={[styles.rowDates, { color: theme.colors.textSecondary }]}>
-                    {trip.startDate} — {trip.endDate} ({trip.totalDays} Days)
-                  </Text>
-                </View>
-                <ArrowRight size={18} color={theme.colors.textSecondary} />
-              </Pressable>
-            ))}
-          </Animated.View>
+          {/* Upcoming */}
+          {upcomingTrips.length > 0 && (
+            <Animated.View entering={FadeInDown.duration(400).delay(240)} style={styles.upcomingSection}>
+              <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
+                UPCOMING
+              </Text>
+              {upcomingTrips.map((trip) => (
+                <Pressable
+                  key={trip.id}
+                  onPress={() => handleTripOverview(trip.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View ${trip.title}`}
+                  style={[styles.tripRow, { borderBottomColor: theme.colors.borderSubtle }]}
+                >
+                  <Image source={{ uri: trip.coverImage }} style={styles.rowThumbnail} />
+                  <View style={styles.rowInfo}>
+                    <Text style={[styles.rowDest, { color: theme.colors.accentBrand }]}>
+                      {trip.destination.toUpperCase()}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.rowTitle,
+                        { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+                      ]}
+                    >
+                      {trip.title}
+                    </Text>
+                    <Text style={[styles.rowDates, { color: theme.colors.textSecondary }]}>
+                      {trip.startDate} — {trip.endDate}
+                    </Text>
+                  </View>
+                  <ArrowRight size={16} color={theme.colors.textMuted} />
+                </Pressable>
+              ))}
+            </Animated.View>
+          )}
         </>
       )}
 
       {activeTab === 'Past' && (
         <Animated.View entering={FadeInDown.duration(400)} style={styles.pastSection}>
           <Text style={[styles.sectionOverline, { color: theme.colors.accentBrand }]}>
-            COMPLETED JOURNEYS ({pastTrips.length})
+            COMPLETED
           </Text>
-
+          {pastTrips.length === 0 && (
+            <View style={styles.emptyState}>
+              <Text
+                style={[
+                  styles.emptyTitle,
+                  { color: theme.colors.textPrimary, fontFamily: theme.fonts.serifSemiBold },
+                ]}
+              >
+                No completed trips yet
+              </Text>
+              <Text
+                style={[
+                  styles.emptyDesc,
+                  { color: theme.colors.textSecondary, fontFamily: theme.fonts.sansRegular },
+                ]}
+              >
+                Finished trips will appear here as part of your travel journal.
+              </Text>
+            </View>
+          )}
           {pastTrips.map((trip) => (
             <Pressable
               key={trip.id}
               onPress={() => handleTripOverview(trip.id)}
-              style={[
-                styles.tripRow,
-                { borderBottomColor: theme.colors.borderSubtle },
-              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`View ${trip.title}`}
+              style={[styles.tripRow, { borderBottomColor: theme.colors.borderSubtle }]}
             >
               <Image source={{ uri: trip.coverImage }} style={styles.rowThumbnail} />
               <View style={styles.rowInfo}>
@@ -176,7 +200,7 @@ export default function TripsScreen() {
                   {trip.title}
                 </Text>
                 <Text style={[styles.rowDates, { color: theme.colors.textSecondary }]}>
-                  {trip.startDate} — {trip.endDate} • {trip.placesVisited || 12} places visited
+                  {trip.startDate} — {trip.endDate}
                 </Text>
               </View>
             </Pressable>
@@ -192,46 +216,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    justify: 'space-between',
-    marginBottom: 16,
-  },
-  overline: {
-    fontSize: 10,
-    letterSpacing: 1.5,
-    marginBottom: 4,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.4,
   },
-  addNavBtn: {
+  addBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   tabRow: {
     flexDirection: 'row',
-    marginBottom: 24,
+    marginBottom: 28,
   },
   activeSection: {
     marginBottom: 32,
   },
   sectionOverline: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: '600',
     letterSpacing: 1.2,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   heroCard: {
-    height: 280,
+    height: 260,
     width: '100%',
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -241,39 +262,42 @@ const styles = StyleSheet.create({
   },
   heroScrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justify: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    justifyContent: 'flex-end',
     padding: 20,
   },
   dayTag: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 10,
     alignSelf: 'flex-start',
     marginBottom: 8,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   dayTagText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
+    letterSpacing: 0.5,
   },
   heroDestination: {
     color: '#E07A5F',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1.2,
     marginBottom: 2,
   },
   heroTitle: {
     color: '#FFFFFF',
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 26,
+    lineHeight: 32,
     fontFamily: 'PlayfairDisplay_600SemiBold',
     marginBottom: 4,
   },
   heroDates: {
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255,255,255,0.8)',
     fontSize: 13,
   },
   upcomingSection: {
@@ -283,11 +307,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
   },
   rowThumbnail: {
-    width: 68,
-    height: 68,
+    width: 64,
+    height: 64,
     borderRadius: 10,
     marginRight: 14,
   },
@@ -297,12 +321,13 @@ const styles = StyleSheet.create({
   },
   rowDest: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: 1,
     marginBottom: 2,
   },
   rowTitle: {
-    fontSize: 18,
+    fontSize: 17,
+    lineHeight: 22,
     marginBottom: 2,
   },
   rowDates: {
@@ -310,5 +335,19 @@ const styles = StyleSheet.create({
   },
   pastSection: {
     marginBottom: 24,
+  },
+  emptyState: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    fontSize: 18,
+    marginBottom: 6,
+  },
+  emptyDesc: {
+    fontSize: 14,
+    textAlign: 'center',
+    maxWidth: 260,
+    lineHeight: 20,
   },
 });
