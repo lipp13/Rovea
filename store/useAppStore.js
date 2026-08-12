@@ -32,6 +32,12 @@ export const useAppStore = create((set, get) => ({
   selectedPlace: null,
   targetDayForAdd: 3,
 
+  // Onboarding actions
+  completeOnboarding: () => {
+    set({ hasCompletedOnboarding: true });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+  },
+
   // Theme actions
   toggleTheme: () => {
     const nextMode = get().themeMode === 'light' ? 'dark' : 'light';
