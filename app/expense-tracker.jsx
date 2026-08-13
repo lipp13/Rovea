@@ -7,6 +7,7 @@ import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useAppStore } from '../store/useAppStore';
 import { getTheme } from '../constants/theme';
 import { Button } from '../components/ui/Button';
+import { formatCurrency } from '../utils/formatters';
 
 export default function ExpenseTrackerScreen() {
   const insets = useSafeAreaInsets();
