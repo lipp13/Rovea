@@ -16,6 +16,7 @@ export const radii = {
   md: 12,
   lg: 16,
   xl: 20,
+  xxl: 28,
   pill: 9999,
 };
 
@@ -38,6 +39,13 @@ export const shadows = {
     shadowRadius: 10,
     elevation: 2,
   },
+  glow: {
+    shadowColor: '#C25E38',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 5,
+  },
   floatingNav: {
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
@@ -53,3 +61,4 @@ export const shadows = {
     elevation: 8,
   },
 };
+
