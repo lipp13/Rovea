@@ -7,19 +7,33 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF8F4"
+    },
     "plugins": [
       "expo-router"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rovea.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Rovea uses your location to discover nearby attractions, local weather, and itinerary spots."
+      }
     },
     "android": {
+      "package": "com.rovea.app",
       "adaptiveIcon": {
         "backgroundColor": "#FBF9F5",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
