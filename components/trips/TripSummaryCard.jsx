@@ -5,7 +5,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { getTheme } from '../../constants/theme';
 import { Card } from '../ui/Card';
 
-export const TripSummaryCard = ({ trip, onPress }) => {
+export const TripSummaryCard = React.memo(({ trip, onPress }) => {
   const themeMode = useAppStore((state) => state.themeMode);
   const theme = getTheme(themeMode);
 
@@ -155,3 +155,5 @@ const styles = StyleSheet.create({
     paddingLeft: 6,
   },
 });
+
+TripSummaryCard.displayName = 'TripSummaryCard';
