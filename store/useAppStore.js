@@ -47,6 +47,25 @@ export const useAppStore = create(
         return trips.find((t) => t.id === activeTripId) || trips[0] || initialActiveTrip;
       },
 
+      getFilteredDestinations: (category = 'All', searchQuery = '') => {
+        const { destinations } = get();
+        return destinations.filter((dest) => {
+          const matchesCategory = category === 'All' || dest.category?.toLowerCase() === category.toLowerCase();
+          const matchesSearch =
+            !searchQuery ||
+            dest.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            dest.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            dest.country?.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
+      },
+
+      getTotalExpensesSpent: () => {
+        const { expenseTracker } = get();
+        if (!expenseTracker || !expenseTracker.items) return 0;
+        return expenseTracker.items.reduce((sum, item) => sum + (item.amount || 0), 0);
+      },
+
       // Onboarding actions
       completeOnboarding: () => {
         set({ hasCompletedOnboarding: true });
