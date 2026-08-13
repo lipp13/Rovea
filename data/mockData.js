@@ -1,6 +1,6 @@
 export const currentUser = {
-  name: 'Alex Vance',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+  name: 'Jefri Nichol',
+  avatar: 'https://imgs.search.brave.com/iE8EB2CU4AlRqzIv93vHgk5a_VcVdQs5UEXEYjX2g1U/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZS5wb3BtYW1hLmNv/bS9wb3N0LzIwMjQx/MDI0L0plZnJpJTIw/TmljaG9sLVQ0dUY0/Y3haNXBYVlZQSVhW/UUg3WHk3bkJnNHl4/QkdLLmpwZw',
   tripsCount: 4,
   citiesCount: 12,
   savedPlacesCount: 18,
